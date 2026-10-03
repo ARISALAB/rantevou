@@ -6,6 +6,9 @@
 <title>Κλείστε ραντεβού</title>
 <meta name="description" content="Κλείστε online ραντεβού: δείτε τις διαθέσιμες ώρες και κλείστε σε ένα λεπτό.">
 <meta name="theme-color" content="#0b0b0c">
+<link rel="icon" href="/favicon.ico" sizes="48x48" id="icoIco">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" id="icoSvg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" id="icoApple">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@300;400;500;600&family=Noto+Serif+Display:ital,wght@0,400;0,500;1,400&display=swap">
@@ -451,6 +454,11 @@
     if (c.theme) { document.documentElement.style.setProperty('--gold', c.theme.accent); }
     $('bizName').textContent = c.name;
     $('logo').onerror = () => { $('logo').hidden = true; };
+    if (c.icons) {   // το εικονίδιο της επιχείρησης στην καρτέλα και στην αρχική οθόνη του κινητού
+      if (c.icons.svg) $('icoSvg').href = c.icons.svg;
+      if (c.icons.png) { $('icoIco').href = c.icons.png; $('icoIco').removeAttribute('sizes'); $('icoIco').type = 'image/png'; }
+      if (c.icons.apple) $('icoApple').href = c.icons.apple;
+    }
     $('logo').src = c.logo; $('brand').href = c.site;
     $('ftName').textContent = c.name; $('ftSite').href = c.site; $('ftSite').textContent = c.site.replace(/^https?:\/\//, '').replace(/\/$/, '');
     applyLang();

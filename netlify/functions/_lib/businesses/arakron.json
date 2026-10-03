@@ -8,6 +8,11 @@
   "site": "https://www.arakronservices.gr/",
   "privacy": { "el": "https://www.arakronservices.gr/privacy", "en": "https://www.arakronservices.gr/en/privacy" },
   "logo": "https://www.arakronservices.gr/favicon-512.png",
+  "icons": {
+    "svg": "https://www.arakronservices.gr/favicon.svg?v=3",
+    "png": "https://www.arakronservices.gr/favicon-32x32.png?v=3",
+    "apple": "https://www.arakronservices.gr/apple-touch-icon.png?v=3"
+  },
   "phone": "+306983661460",
   "ownerEmail": "info@arakronservices.gr",
   "address": "Γρίβα Διγενή 2, 17342 Άγιος Δημήτριος, Αττική",

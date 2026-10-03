@@ -14,9 +14,9 @@ function loadBusiness(id) {
 
 // Ό,τι βλέπει ο επισκέπτης (χωρίς email ιδιοκτήτη κ.λπ.)
 function publicConfig(biz) {
-  const { id, name, tagline, site, privacy, logo, phone, theme, modes, services, maxDaysAhead, hours } = biz;
+  const { id, name, tagline, site, privacy, logo, icons, phone, theme, modes, services, maxDaysAhead, hours } = biz;
   return {
-    id, name, tagline, site, privacy, logo, phone, theme, modes, maxDaysAhead, hours,
+    id, name, tagline, site, privacy, logo, icons: icons || null, phone, theme, modes, maxDaysAhead, hours,
     services: services.map(s => ({
       id: s.id, name: s.name, desc: s.desc, price: s.price, duration: s.duration,
       modes: s.modes, approval: !!s.approval, extra: s.extra || null,
