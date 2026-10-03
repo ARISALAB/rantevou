@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Ακύρωση ραντεβού</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600&family=Noto+Serif+Display:wght@400&display=swap">
+<style>
+  :root{--bg:#0b0b0c;--panel:#141416;--line:#2a2a2e;--text:#f3efe6;--muted:#a39e93;--gold:#c9a24a;--gold-2:#e2c27a;--err:#e07a6a;--ok:#6fbf8e}
+  *{box-sizing:border-box}[hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.55 "Commissioner",system-ui,sans-serif;min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+  .card{width:100%;max-width:460px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px 24px}
+  .biz{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0 0 10px}
+  h1{font-family:"Noto Serif Display",Georgia,serif;font-weight:400;font-size:1.7rem;line-height:1.2;margin:0 0 16px}
+  .rows{display:grid;gap:8px;margin:0 0 22px;font-size:.96rem}
+  .rows div{display:flex;gap:12px}.rows span{color:var(--muted);min-width:84px}
+  p{color:var(--muted);margin:0 0 18px}
+  .btn{display:inline-flex;justify-content:center;align-items:center;width:100%;border-radius:10px;padding:13px 18px;font-family:inherit;font-weight:600;font-size:1rem;cursor:pointer;border:1px solid transparent;text-decoration:none;margin-top:8px}
+  .danger{background:#3a1f1b;border-color:#6b3329;color:#ffd9d2}.danger:hover{background:#4a2620}
+  .ghost{background:none;border-color:var(--line);color:var(--text)}
+  .gold{background:var(--gold);color:#111}
+  .btn:disabled{opacity:.6;cursor:wait}
+  .msg{padding:12px 14px;border-radius:10px;background:#1b1b1e;margin:0 0 16px;color:var(--text)}
+  .lang{float:right;background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:4px 9px;cursor:pointer;font:inherit;font-size:.82rem}
+</style>
+</head>
+<body>
+<main class="card" aria-live="polite">
+  <button class="lang" id="langBtn" type="button">EN</button>
+  <p class="biz" id="biz">&nbsp;</p>
+  <h1 id="h"></h1>
+  <div id="body"><p>…</p></div>
+</main>
+<script>
+(() => {
+  const q = new URLSearchParams(location.search);
+  const P = { b: q.get('b') || 'arakron', id: q.get('id') || '', t: q.get('t') || '' };
+  let lang = q.get('lang') === 'en' ? 'en' : 'el', info = null, done = false, lastErr = null;
+  const T = {
+    el: { title: 'Ακύρωση ραντεβού', cancelled: 'Το ραντεβού ακυρώθηκε', svc: 'Υπηρεσία', when: 'Πότε', how: 'Πώς',
+      sure: 'Θέλετε σίγουρα να ακυρώσετε αυτό το ραντεβού;', yes: 'Ναι, ακύρωση', keep: 'Όχι, το κρατάω',
+      doneTxt: 'Σας στείλαμε επιβεβαίωση με email. Αν θέλετε, κλείστε νέο ραντεβού.', rebook: 'Νέο ραντεβού',
+      already: 'Αυτό το ραντεβού έχει ήδη ακυρωθεί.', past: 'Αυτό το ραντεβού έχει ήδη περάσει.',
+      notFound: 'Δεν βρέθηκε το ραντεβού. Ελέγξτε το link στο email σας.', err: 'Κάτι πήγε στραβά. Δοκιμάστε ξανά ή καλέστε μας.',
+      call: 'Κλήση', locale: 'el-GR' },
+    en: { title: 'Cancel appointment', cancelled: 'Appointment cancelled', svc: 'Service', when: 'When', how: 'How',
+      sure: 'Are you sure you want to cancel this appointment?', yes: 'Yes, cancel it', keep: 'No, keep it',
+      doneTxt: 'We sent you a confirmation by email. You can book a new appointment any time.', rebook: 'New appointment',
+      already: 'This appointment has already been cancelled.', past: 'This appointment is in the past.',
+      notFound: 'Appointment not found. Please check the link in your email.', err: 'Something went wrong. Please try again or give us a call.',
+      call: 'Call', locale: 'en-GB' },
+  };
+  const t = k => T[lang][k];
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const hm = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  const api = async (action) => {
+    const r = await fetch('/.netlify/functions/appt-cancel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...P, action }) });
+    let d = {}; try { d = await r.json(); } catch (e) {}
+    return { ok: r.ok, status: r.status, d };
+  };
+
+  function render(errKey) {
+    if (errKey) lastErr = errKey;
+    document.documentElement.lang = lang;
+    document.title = t('title');
+    $('langBtn').textContent = lang === 'el' ? 'EN' : 'ΕΛ';
+    if (errKey) { $('h').textContent = t('title'); $('body').innerHTML = `<p>${t(errKey)}</p>`; return; }
+    if (!info) return;
+    $('biz').textContent = info.bizName;
+    const rows = `<div class="rows">
+      <div><span>${t('svc')}</span><b>${esc(info.service[lang])}</b></div>
+      <div><span>${t('when')}</span><b>${esc(new Date(info.date + 'T12:00:00').toLocaleDateString(t('locale'), { weekday: 'long', day: 'numeric', month: 'long' }))}, ${esc(info.time)}–${hm(info.end)}</b></div>
+      <div><span>${t('how')}</span><b>${esc(info.modes[info.mode][lang])}</b></div></div>`;
+    const rebook = `<a class="btn gold" href="/${encodeURIComponent(P.b)}?lang=${lang}">${t('rebook')}</a>`;
+    const call = info.phone ? `<a class="btn ghost" href="tel:${esc(info.phone)}">${t('call')} ${esc(info.phone)}</a>` : '';
+    if (info.status === 'cancelled') {
+      $('h').textContent = t('cancelled');
+      $('body').innerHTML = rows + `<p>${done ? t('doneTxt') : t('already')}</p>` + rebook;
+    } else if (info.past) {
+      $('h').textContent = t('title');
+      $('body').innerHTML = rows + `<p>${t('past')}</p>` + call;
+    } else {
+      $('h').textContent = t('title');
+      $('body').innerHTML = rows + `<p>${t('sure')}</p><p class="msg" id="err" hidden></p>
+        <button class="btn danger" id="yes" type="button">${t('yes')}</button>
+        <a class="btn ghost" href="${esc(info.site || '/')}">${t('keep')}</a>`;
+      $('yes').onclick = async () => {
+        $('yes').disabled = true;
+        const r = await api('cancel');
+        if (r.ok) { info = { ...info, ...r.d, status: 'cancelled' }; done = true; render(); return; }
+        $('yes').disabled = false; $('err').hidden = false; $('err').textContent = t(r.d.error === 'past' ? 'past' : 'err');
+      };
+    }
+  }
+
+  $('langBtn').onclick = () => { lang = lang === 'el' ? 'en' : 'el'; render(info ? null : lastErr); };
+  (async () => {
+    render();
+    if (!P.id || !P.t) return render('notFound');
+    const r = await api('info');
+    if (!r.ok) return render(r.status === 404 ? 'notFound' : 'err');
+    info = r.d; render();
+  })();
+})();
+</script>
+</body>
+</html>

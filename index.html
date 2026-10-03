@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Κλείστε ραντεβού</title>
+<meta name="description" content="Κλείστε online ραντεβού: δείτε τις διαθέσιμες ώρες και κλείστε σε ένα λεπτό.">
+<meta name="theme-color" content="#0b0b0c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@300;400;500;600&family=Noto+Serif+Display:ital,wght@0,400;0,500;1,400&display=swap">
+<style>
+  :root{
+    --bg:#0b0b0c; --panel:#141416; --panel-2:#1b1b1e; --line:#2a2a2e; --text:#f3efe6; --muted:#a39e93;
+    --gold:#c9a24a; --gold-2:#e2c27a; --ok:#6fbf8e; --err:#e07a6a;
+    --serif:"Noto Serif Display",Georgia,serif; --sans:"Commissioner",system-ui,sans-serif;
+    --r:14px;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--text);font:400 16px/1.55 var(--sans);-webkit-font-smoothing:antialiased;min-height:100vh}
+  a{color:var(--gold-2)}
+  button{font:inherit;color:inherit}
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px}
+
+  header{border-bottom:1px solid var(--line)}
+  .head{display:flex;align-items:center;gap:14px;height:72px}
+  .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--text);min-width:0}
+  .brand img{width:40px;height:40px;border-radius:10px;background:#000;object-fit:cover;flex-shrink:0}
+  .brand b{display:block;font-family:var(--serif);font-weight:500;font-size:1.15rem;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brand small{display:block;color:var(--muted);font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lang{margin-left:auto;background:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--muted);font-size:.85rem;flex-shrink:0}
+  .lang:hover{color:var(--text);border-color:var(--muted)}
+
+  h1{font-family:var(--serif);font-weight:400;font-size:clamp(1.8rem,5vw,2.4rem);line-height:1.15;margin:34px 0 8px}
+  .lead{color:var(--muted);margin:0 0 26px}
+
+  .steps{display:flex;gap:6px;margin:0 0 26px;padding:0;list-style:none;counter-reset:s}
+  .steps li{flex:1;height:4px;border-radius:4px;background:var(--line);transition:background .3s}
+  .steps li.on{background:var(--gold)}
+  .steplabel{font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin:0 0 8px}
+
+  .panel{display:none}
+  .panel.on{display:block;animation:in .35s ease}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.panel.on{animation:none}}
+  h2{font-family:var(--serif);font-weight:400;font-size:1.5rem;margin:0 0 18px}
+
+  .services{display:grid;gap:12px}
+  .svc{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px 18px 16px;cursor:pointer;transition:border-color .2s,background .2s}
+  .svc:hover{border-color:#4a4436;background:var(--panel-2)}
+  .svc:focus-visible,.chip:focus-visible,.day:focus-visible,.btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .svc-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .svc h3{margin:0;font-size:1.08rem;font-weight:600}
+  .svc .dur{color:var(--muted);font-size:.88rem}
+  .svc .price{margin-left:auto;color:var(--gold-2);font-size:.88rem;font-weight:500}
+  .svc p{margin:6px 0 0;color:var(--muted);font-size:.94rem}
+  .tag{display:inline-block;margin-top:10px;font-size:.76rem;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:2px 9px}
+
+  .picked{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin:0 0 18px;font-size:.94rem}
+  .picked .pk{min-width:0;flex:1}
+  .picked b{font-weight:600;display:block}
+  .picked small{color:var(--muted);font-size:.88rem;display:block}
+  .picked button{margin-left:auto;background:none;border:0;color:var(--gold-2);cursor:pointer;font-size:.88rem;padding:4px;flex-shrink:0}
+
+  .label{font-size:.85rem;color:var(--muted);margin:0 0 8px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+  .chip{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 14px;cursor:pointer;font-size:.94rem;transition:all .15s}
+  .chip:hover{border-color:var(--muted)}
+  .chip[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#111;font-weight:600}
+
+  .cal{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:0 0 18px}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px}
+  .cal-head b{font-weight:500;text-transform:capitalize}
+  .nav{background:none;border:1px solid var(--line);border-radius:8px;width:36px;height:36px;cursor:pointer;color:var(--text)}
+  .nav:disabled{opacity:.3;cursor:default}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+  .dow{font-size:.72rem;color:var(--muted);padding:4px 0;text-transform:uppercase;letter-spacing:.05em}
+  .day{height:44px;width:100%;display:grid;place-items:center;border-radius:10px;border:1px solid transparent;background:none;cursor:default;color:#55524c;font-size:.95rem;padding:0}
+  .day.avail{color:var(--text);border-color:#3a352a;background:#1d1a14;cursor:pointer;font-weight:500}
+  .day.avail:hover{border-color:var(--gold)}
+  .day.sel{background:var(--gold);color:#111;border-color:var(--gold)}
+  .day.today{text-decoration:underline;text-underline-offset:4px}
+
+  .times{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:8px;margin:0 0 6px}
+  .times .chip{text-align:center;padding:10px 0}
+  .empty{color:var(--muted);font-size:.94rem;margin:4px 0 16px}
+
+  form{display:grid;gap:14px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:560px){.row2{grid-template-columns:1fr}}
+  label.f{display:grid;gap:6px;font-size:.88rem;color:var(--muted)}
+  input,textarea,select{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 13px;color:var(--text);font:inherit;font-size:16px}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--gold)}
+  textarea{min-height:96px;resize:vertical}
+  .req{color:var(--gold)}
+  .consent{display:flex;gap:10px;align-items:flex-start;font-size:.88rem;color:var(--muted)}
+  .consent input{width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:var(--gold)}
+  .hp{position:absolute;left:-9999px;opacity:0;height:0;width:0}
+
+  .actions{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;padding:13px 22px;font-weight:600;cursor:pointer;border:1px solid transparent;text-decoration:none;font-size:1rem}
+  .btn-gold{background:var(--gold);color:#111}
+  .btn-gold:hover{background:var(--gold-2)}
+  .btn-gold:disabled{opacity:.55;cursor:wait}
+  .btn-ghost{background:none;border-color:var(--line);color:var(--text)}
+  .btn-ghost:hover{border-color:var(--muted)}
+  .err{color:var(--err);font-size:.92rem;min-height:1.2em;margin:0}
+
+  .done{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:26px 22px;text-align:center}
+  .done .mark{width:56px;height:56px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;background:#1f2a22;color:var(--ok);font-size:1.6rem}
+  .done.pend .mark{background:#2a2517;color:var(--gold-2)}
+  .summary{text-align:left;margin:18px auto 22px;max-width:420px;display:grid;gap:8px;font-size:.95rem}
+  .summary div{display:flex;gap:12px}
+  .summary span{color:var(--muted);min-width:90px}
+  .done .actions{justify-content:center}
+
+  .loading{color:var(--muted);padding:30px 0}
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  footer{color:#6d6960;font-size:.8rem;text-align:center;padding:40px 16px 30px}
+  footer a{color:#8d887d}
+</style>
+</head>
+<body>
+<header><div class="wrap head">
+  <a class="brand" id="brand" href="#"><img id="logo" alt=""><span><b id="bizName">…</b><small id="bizTag"></small></span></a>
+  <button class="lang" id="langBtn" type="button">EN</button>
+</div></header>
+
+<main class="wrap" id="app">
+  <h1 id="title"></h1>
+  <p class="lead" id="lead"></p>
+  <ol class="steps" aria-hidden="true"><li></li><li></li><li></li></ol>
+  <div id="loading" class="loading"><span class="spinner"></span></div>
+
+  <!-- 1. Υπηρεσία -->
+  <section class="panel" id="p1" aria-labelledby="h1s">
+    <p class="steplabel" data-t="step1"></p>
+    <h2 id="h1s" data-t="pickService"></h2>
+    <div class="services" id="services"></div>
+  </section>
+
+  <!-- 2. Ημέρα & ώρα -->
+  <section class="panel" id="p2" aria-labelledby="h2s">
+    <p class="steplabel" data-t="step2"></p>
+    <h2 id="h2s" data-t="pickTime"></h2>
+    <div class="picked" id="picked2"></div>
+    <div id="modeBox"><p class="label" data-t="how"></p><div class="chips" id="modes"></div></div>
+    <div class="cal">
+      <div class="cal-head"><button class="nav" id="prevM" type="button" aria-label="‹">‹</button><b id="monthLbl"></b><button class="nav" id="nextM" type="button" aria-label="›">›</button></div>
+      <div class="grid" id="grid"></div>
+    </div>
+    <div id="timeBox" hidden><p class="label" id="timeLbl"></p><div class="times" id="times"></div></div>
+    <p class="empty" id="noSlots" hidden></p>
+    <div class="actions"><button class="btn btn-ghost" type="button" data-back="1" data-t="back"></button></div>
+  </section>
+
+  <!-- 3. Στοιχεία -->
+  <section class="panel" id="p3" aria-labelledby="h3s">
+    <p class="steplabel" data-t="step3"></p>
+    <h2 id="h3s" data-t="yourDetails"></h2>
+    <div class="picked" id="picked3"></div>
+    <form id="form" novalidate>
+      <div class="row2">
+        <label class="f"><span><span data-t="name"></span> <span class="req">*</span></span><input name="name" autocomplete="name" required maxlength="100"></label>
+        <label class="f"><span data-t="company"></span><input name="company" autocomplete="organization" maxlength="120"></label>
+      </div>
+      <div class="row2">
+        <label class="f"><span><span data-t="phone"></span> <span class="req">*</span></span><input name="phone" type="tel" autocomplete="tel" required maxlength="30"></label>
+        <label class="f"><span>Email <span class="req">*</span></span><input name="email" type="email" autocomplete="email" required maxlength="120"></label>
+      </div>
+      <label class="f" id="addrBox" hidden><span><span data-t="address"></span> <span class="req">*</span></span><input name="address" autocomplete="street-address" maxlength="200"></label>
+      <label class="f" id="extraBox" hidden><span><span id="extraLbl"></span> <span class="req">*</span></span><select name="extra"></select></label>
+      <label class="f"><span data-t="notes"></span><textarea name="notes" maxlength="1500"></textarea></label>
+      <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <label class="consent"><input type="checkbox" name="consent" required><span id="consentTxt"></span></label>
+      <p class="err" id="formErr" role="alert"></p>
+      <div class="actions">
+        <button class="btn btn-gold" type="submit" id="submitBtn"></button>
+        <button class="btn btn-ghost" type="button" data-back="2" data-t="back"></button>
+      </div>
+    </form>
+  </section>
+
+  <!-- 4. Ολοκλήρωση -->
+  <section class="panel" id="p4" aria-live="polite">
+    <div class="done" id="done"></div>
+  </section>
+</main>
+
+<footer><span id="ftName"></span> · <a id="ftSite" href="#"></a></footer>
+
+<script>
+(() => {
+  const API = '/.netlify/functions/';
+  const qs = new URLSearchParams(location.search);
+  // Η επιχείρηση: /arakron  ή  /index.html?b=arakron
+  const seg = location.pathname.split('/').filter(Boolean)[0] || '';
+  const BIZ = (seg && !/\.html$/.test(seg) ? seg : qs.get('b') || 'arakron').toLowerCase();
+
+  const T = {
+    el: {
+      title: 'Κλείστε ραντεβού', lead: 'Διαλέξτε υπηρεσία, ημέρα και ώρα. Παίρνετε επιβεβαίωση στο email σας.',
+      step1: 'Βήμα 1 από 3', step2: 'Βήμα 2 από 3', step3: 'Βήμα 3 από 3',
+      pickService: 'Τι θα θέλατε;', pickTime: 'Διαλέξτε ημέρα και ώρα', yourDetails: 'Τα στοιχεία σας',
+      how: 'Πώς θα γίνει;', back: '← Πίσω', change: 'Αλλαγή', min: "'", hours: 'ώρες', hour: 'ώρα',
+      approval: 'Θα σας επιβεβαιώσουμε τηλεφωνικά', timesFor: d => `Διαθέσιμες ώρες, ${d}`,
+      noSlots: 'Δεν υπάρχουν διαθέσιμες ώρες αυτόν τον μήνα. Δοκιμάστε τον επόμενο ή καλέστε μας.',
+      pickDay: 'Διαλέξτε μια ημέρα από το ημερολόγιο.',
+      name: 'Ονοματεπώνυμο', company: 'Επιχείρηση', phone: 'Τηλέφωνο', address: 'Διεύθυνση καταστήματος',
+      notes: 'Θέλετε να μας πείτε κάτι από πριν;',
+      consent: url => `Συμφωνώ να χρησιμοποιηθούν τα στοιχεία μου για το ραντεβού, σύμφωνα με την <a href="${url}" target="_blank" rel="noopener">πολιτική απορρήτου</a>.`,
+      book: 'Κλείσιμο ραντεβού', request: 'Αποστολή αιτήματος', sending: 'Αποστολή…',
+      errFill: 'Συμπληρώστε τα πεδία με αστερίσκο και αποδεχτείτε την πολιτική απορρήτου.',
+      errEmail: 'Ελέγξτε το email.', errPhone: 'Ελέγξτε το τηλέφωνο.',
+      errTaken: 'Μόλις κάποιος άλλος έκλεισε αυτή την ώρα. Διαλέξτε άλλη.',
+      errRate: 'Πολλές προσπάθειες σε λίγο χρόνο. Δοκιμάστε ξανά σε λίγα λεπτά ή καλέστε μας.',
+      errGen: 'Κάτι πήγε στραβά. Δοκιμάστε ξανά ή καλέστε μας.',
+      okTitle: 'Το ραντεβού κλείστηκε', okText: e => `Στείλαμε επιβεβαίωση στο <b>${e}</b>.`,
+      pendTitle: 'Λάβαμε το αίτημά σας', pendText: e => `Θα σας καλέσουμε σύντομα για να το επιβεβαιώσουμε. Στείλαμε τα στοιχεία στο <b>${e}</b>.`,
+      sService: 'Υπηρεσία', sWhen: 'Πότε', sHow: 'Πώς',
+      addCal: 'Προσθήκη στο ημερολόγιο', another: 'Νέο ραντεβού', toSite: 'Στον ιστότοπο',
+      dows: ['Δε', 'Τρ', 'Τε', 'Πε', 'Πα', 'Σα', 'Κυ'], locale: 'el-GR', loadErr: 'Η σελίδα δεν φόρτωσε. Ανανεώστε ή καλέστε μας.',
+    },
+    en: {
+      title: 'Book an appointment', lead: 'Choose a service, a day and a time. You get a confirmation by email.',
+      step1: 'Step 1 of 3', step2: 'Step 2 of 3', step3: 'Step 3 of 3',
+      pickService: 'What would you like?', pickTime: 'Choose a day and time', yourDetails: 'Your details',
+      how: 'How should it take place?', back: '← Back', change: 'Change', min: ' min', hours: 'hours', hour: 'hour',
+      approval: 'We will confirm by phone', timesFor: d => `Available times, ${d}`,
+      noSlots: 'No available times this month. Try the next one or give us a call.',
+      pickDay: 'Choose a day from the calendar.',
+      name: 'Full name', company: 'Business', phone: 'Phone', address: 'Venue address',
+      notes: 'Anything you would like to tell us in advance?',
+      consent: url => `I agree that my details are used for this appointment, in line with the <a href="${url}" target="_blank" rel="noopener">privacy policy</a>.`,
+      book: 'Book appointment', request: 'Send request', sending: 'Sending…',
+      errFill: 'Fill in the fields marked with an asterisk and accept the privacy policy.',
+      errEmail: 'Please check your email.', errPhone: 'Please check your phone number.',
+      errTaken: 'Someone just booked this time. Please choose another one.',
+      errRate: 'Too many attempts. Please try again in a few minutes or give us a call.',
+      errGen: 'Something went wrong. Please try again or give us a call.',
+      okTitle: 'Your appointment is booked', okText: e => `We sent a confirmation to <b>${e}</b>.`,
+      pendTitle: 'We received your request', pendText: e => `We will call you shortly to confirm it. We sent the details to <b>${e}</b>.`,
+      sService: 'Service', sWhen: 'When', sHow: 'How',
+      addCal: 'Add to calendar', another: 'New appointment', toSite: 'Back to website',
+      dows: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'], locale: 'en-GB', loadErr: 'The page did not load. Please refresh or give us a call.',
+    },
+  };
+
+  let lang = qs.get('lang') === 'en' || (!qs.get('lang') && !/^el/i.test(navigator.language || 'el')) ? 'en' : 'el';
+  const state = { cfg: null, svc: null, mode: null, avail: null, month: null, date: null, time: null };
+  const $ = id => document.getElementById(id);
+  const t = k => T[lang][k];
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const dur = m => m < 60 ? `${m}${t('min')}` : (m % 60 ? `${(m / 60).toLocaleString(t('locale'))} ${t('hours')}` : `${m / 60} ${m === 60 ? t('hour') : t('hours')}`);
+  const longDate = d => new Date(d + 'T12:00:00').toLocaleDateString(t('locale'), { weekday: 'long', day: 'numeric', month: 'long' });
+  const addMin = (time, m) => { const [h, mm] = time.split(':').map(Number); const x = h * 60 + mm + m; return String(Math.floor(x / 60)).padStart(2, '0') + ':' + String(x % 60).padStart(2, '0'); };
+
+  async function api(name, body) {
+    const r = await fetch(API + name, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {});
+    let data = {}; try { data = await r.json(); } catch (e) {}
+    return { ok: r.ok, status: r.status, data };
+  }
+
+  function go(n) {
+    document.querySelectorAll('.panel').forEach((p, i) => p.classList.toggle('on', i === n - 1));
+    document.querySelectorAll('.steps li').forEach((li, i) => li.classList.toggle('on', i < n));
+    if (n > 1) window.scrollTo({ top: $('title').offsetTop - 10, behavior: 'smooth' });
+  }
+
+  function applyLang() {
+    document.documentElement.lang = lang;
+    document.title = `${t('title')} · ${state.cfg ? state.cfg.name : ''}`;
+    $('langBtn').textContent = lang === 'el' ? 'EN' : 'ΕΛ';
+    $('title').textContent = t('title');
+    $('lead').textContent = t('lead');
+    document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
+    if (!state.cfg) return;
+    const c = state.cfg;
+    $('bizTag').textContent = c.tagline ? c.tagline[lang] : '';
+    $('consentTxt').innerHTML = t('consent')((c.privacy && c.privacy[lang]) || c.site);
+    renderServices();
+    if (state.svc) { renderPicked(); renderModes(); renderCal(); renderTimes(); setupForm(); }
+  }
+
+  function renderServices() {
+    $('services').innerHTML = state.cfg.services.map(s => `
+      <button class="svc" type="button" data-id="${esc(s.id)}">
+        <div class="svc-top"><h3>${esc(s.name[lang])}</h3><span class="dur">${dur(s.duration)}</span>${s.price ? `<span class="price">${esc(s.price[lang])}</span>` : ''}</div>
+        <p>${esc(s.desc[lang])}</p>
+        ${s.approval ? `<span class="tag">${t('approval')}</span>` : ''}
+      </button>`).join('');
+    $('services').querySelectorAll('.svc').forEach(b => b.addEventListener('click', () => pickService(b.dataset.id)));
+  }
+
+  function renderPicked() {
+    const s = state.svc;
+    const when = state.date && state.time ? `${esc(longDate(state.date))}, ${state.time}–${addMin(state.time, s.duration)}` : '';
+    const html = n => `<div class="pk"><b>${esc(s.name[lang])}</b><small>${n === 3 && when ? when : dur(s.duration)}</small></div><button type="button" data-goto="${n === 3 ? 2 : 1}">${t('change')}</button>`;
+    $('picked2').innerHTML = html(2);
+    $('picked3').innerHTML = html(3);
+    document.querySelectorAll('[data-goto]').forEach(b => b.onclick = () => go(+b.dataset.goto));
+  }
+
+  function renderModes() {
+    const ms = state.svc.modes;
+    $('modeBox').hidden = ms.length < 2;
+    $('modes').innerHTML = ms.map(m => `<button class="chip" type="button" data-m="${m}" aria-pressed="${state.mode === m}">${esc(state.cfg.modes[m][lang])}</button>`).join('');
+    $('modes').querySelectorAll('.chip').forEach(b => b.onclick = () => { state.mode = b.dataset.m; renderModes(); setupForm(); });
+  }
+
+  async function pickService(id) {
+    state.svc = state.cfg.services.find(s => s.id === id);
+    state.mode = state.svc.modes[0];
+    state.date = state.time = null; state.avail = null;
+    renderPicked(); renderModes();
+    $('grid').innerHTML = ''; $('timeBox').hidden = true; $('noSlots').hidden = true;
+    go(2);
+    $('monthLbl').innerHTML = '<span class="spinner"></span>';
+    const r = await api('appt-availability', { b: BIZ, service: id });
+    if (!r.ok) { $('noSlots').textContent = t('errGen'); $('noSlots').hidden = false; $('monthLbl').textContent = ''; return; }
+    state.avail = r.data;
+    const first = Object.keys(r.data.days).sort()[0] || r.data.today;
+    state.month = first.slice(0, 7);
+    renderCal();
+  }
+
+  function monthShift(ym, n) { const [y, m] = ym.split('-').map(Number); const d = new Date(Date.UTC(y, m - 1 + n, 1)); return d.toISOString().slice(0, 7); }
+
+  function renderCal() {
+    if (!state.avail) return;
+    const { today, days } = state.avail;
+    const ym = state.month, [y, m] = ym.split('-').map(Number);
+    $('monthLbl').textContent = new Date(y, m - 1, 1).toLocaleDateString(t('locale'), { month: 'long', year: 'numeric' });
+    const keys = Object.keys(days).sort();
+    const lastYm = (keys[keys.length - 1] || today).slice(0, 7);
+    $('prevM').disabled = ym <= today.slice(0, 7);
+    $('nextM').disabled = ym >= lastYm;
+    const firstDow = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7;
+    const nDays = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    let html = t('dows').map(d => `<div class="dow">${d}</div>`).join('') + '<div></div>'.repeat(firstDow);
+    let any = false;
+    for (let d = 1; d <= nDays; d++) {
+      const ds = `${ym}-${String(d).padStart(2, '0')}`;
+      const av = days[ds] && days[ds].length;
+      if (av) any = true;
+      const cls = ['day', av ? 'avail' : '', ds === state.date ? 'sel' : '', ds === today ? 'today' : ''].join(' ');
+      html += av
+        ? `<button type="button" class="${cls}" data-d="${ds}" aria-label="${esc(longDate(ds))}">${d}</button>`
+        : `<div class="${cls}" aria-hidden="true">${d}</div>`;
+    }
+    $('grid').innerHTML = html;
+    $('grid').querySelectorAll('button.day').forEach(b => b.onclick = () => { state.date = b.dataset.d; state.time = null; renderCal(); renderTimes(); });
+    $('noSlots').hidden = any;
+    $('noSlots').textContent = t('noSlots');
+    if (!state.date) { $('timeBox').hidden = true; }
+  }
+
+  function renderTimes() {
+    if (!state.date || !state.avail) { $('timeBox').hidden = true; return; }
+    const list = state.avail.days[state.date] || [];
+    $('timeBox').hidden = false;
+    $('timeLbl').textContent = t('timesFor')(longDate(state.date));
+    $('times').innerHTML = list.map(x => `<button class="chip" type="button" data-time="${x}" aria-pressed="${x === state.time}">${x}</button>`).join('');
+    $('times').querySelectorAll('.chip').forEach(b => b.onclick = () => { state.time = b.dataset.time; renderPicked(); setupForm(); go(3); });
+  }
+
+  function setupForm() {
+    const s = state.svc, f = $('form');
+    $('addrBox').hidden = state.mode !== 'onsite';
+    f.address.required = state.mode === 'onsite';
+    $('extraBox').hidden = !s.extra;
+    if (s.extra) {
+      $('extraLbl').textContent = s.extra.label[lang];
+      const cur = f.extra.value;
+      f.extra.innerHTML = `<option value="">—</option>` + s.extra.options.map(o => `<option${o === cur ? ' selected' : ''}>${esc(o)}</option>`).join('');
+    }
+    $('submitBtn').textContent = s.approval ? t('request') : t('book');
+    $('formErr').textContent = '';
+  }
+
+  $('form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = e.target, s = state.svc;
+    const v = n => (f[n] && f[n].value || '').trim();
+    const err = msg => { $('formErr').textContent = msg; };
+    if (!v('name') || !v('phone') || !v('email') || !f.consent.checked || (state.mode === 'onsite' && !v('address')) || (s.extra && !v('extra'))) return err(t('errFill'));
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email'))) return err(t('errEmail'));
+    if (v('phone').replace(/\D/g, '').length < 8) return err(t('errPhone'));
+    const btn = $('submitBtn'); btn.disabled = true; btn.innerHTML = `<span class="spinner"></span> ${t('sending')}`;
+    const r = await api('appt-book', {
+      b: BIZ, service: s.id, date: state.date, time: state.time, mode: state.mode,
+      name: v('name'), company: v('company'), phone: v('phone'), email: v('email'),
+      address: v('address'), extra: v('extra'), notes: v('notes'), website: v('website'),
+      consent: f.consent.checked, lang,
+    });
+    btn.disabled = false; setupForm();
+    if (r.ok) return showDone(r.data.status, v('email'));
+    if (r.data.error === 'slot_taken' || r.data.error === 'bad_time') {
+      err(t('errTaken'));
+      const fresh = await api('appt-availability', { b: BIZ, service: s.id });
+      if (fresh.ok) { state.avail = fresh.data; state.time = null; renderCal(); renderTimes(); setTimeout(() => go(2), 1400); }
+      return;
+    }
+    err(r.status === 429 ? t('errRate') : t('errGen'));
+  });
+
+  function gcal() {
+    const c = state.cfg, s = state.svc, st = (d, x) => d.replace(/-/g, '') + 'T' + x.replace(':', '') + '00';
+    const p = new URLSearchParams({ action: 'TEMPLATE', text: `${s.name[lang]} – ${c.name}`, dates: `${st(state.date, state.time)}/${st(state.date, addMin(state.time, s.duration))}`, ctz: 'Europe/Athens', details: `${c.name} · ${c.phone || ''}` });
+    return 'https://calendar.google.com/calendar/render?' + p;
+  }
+
+  function showDone(status, email) {
+    const pend = status === 'pending', c = state.cfg, s = state.svc;
+    $('done').className = 'done' + (pend ? ' pend' : '');
+    $('done').innerHTML = `
+      <div class="mark" aria-hidden="true">${pend ? '…' : '✓'}</div>
+      <h2 style="margin:0 0 6px">${pend ? t('pendTitle') : t('okTitle')}</h2>
+      <p style="margin:0;color:var(--muted)">${(pend ? t('pendText') : t('okText'))(esc(email))}</p>
+      <div class="summary">
+        <div><span>${t('sService')}</span><b>${esc(s.name[lang])}</b></div>
+        <div><span>${t('sWhen')}</span><b>${esc(longDate(state.date))}, ${state.time}–${addMin(state.time, s.duration)}</b></div>
+        <div><span>${t('sHow')}</span><b>${esc(c.modes[state.mode][lang])}</b></div>
+      </div>
+      <div class="actions">
+        ${pend ? '' : `<a class="btn btn-gold" href="${gcal()}" target="_blank" rel="noopener">${t('addCal')}</a>`}
+        <a class="btn btn-ghost" href="${esc(c.site)}">${t('toSite')}</a>
+      </div>`;
+    $('form').reset();
+    go(4);
+  }
+
+  $('form').addEventListener('input', () => { $('formErr').textContent = ''; });
+  $('form').addEventListener('change', () => { $('formErr').textContent = ''; });
+  document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', () => go(+b.dataset.back)));
+  $('prevM').onclick = () => { state.month = monthShift(state.month, -1); renderCal(); };
+  $('nextM').onclick = () => { state.month = monthShift(state.month, 1); renderCal(); };
+  $('langBtn').onclick = () => { lang = lang === 'el' ? 'en' : 'el'; applyLang(); };
+
+  (async () => {
+    applyLang();
+    const r = await api('appt-config?b=' + encodeURIComponent(BIZ));
+    $('loading').remove();
+    if (!r.ok) { $('lead').textContent = t('loadErr'); return; }
+    const c = state.cfg = r.data;
+    if (c.theme) { document.documentElement.style.setProperty('--gold', c.theme.accent); }
+    $('bizName').textContent = c.name;
+    $('logo').onerror = () => { $('logo').hidden = true; };
+    $('logo').src = c.logo; $('brand').href = c.site;
+    $('ftName').textContent = c.name; $('ftSite').href = c.site; $('ftSite').textContent = c.site.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    applyLang();
+    const pre = qs.get('service');
+    if (pre && c.services.some(s => s.id === pre)) pickService(pre); else go(1);
+  })();
+})();
+</script>
+</body>
+</html>

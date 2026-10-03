@@ -1,0 +1,9 @@
+{
+  "name": "rantevou-functions",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "firebase-admin": "^12.1.0",
+    "resend": "^3.2.0"
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "id": "arakron",
+  "name": "AR Akron Services",
+  "tagline": {
+    "el": "Συμβουλευτική εστίασης & φιλοξενίας",
+    "en": "Restaurant & hospitality consulting"
+  },
+  "site": "https://www.arakronservices.gr/",
+  "privacy": { "el": "https://www.arakronservices.gr/privacy", "en": "https://www.arakronservices.gr/en/privacy" },
+  "logo": "https://www.arakronservices.gr/favicon-512.png",
+  "phone": "+306983661460",
+  "ownerEmail": "info@arakronservices.gr",
+  "address": "Γρίβα Διγενή 2, 17342 Άγιος Δημήτριος, Αττική",
+  "timezone": "Europe/Athens",
+  "theme": { "bg": "#0b0b0c", "accent": "#c9a24a" },
+
+  "hours": {
+    "mon": [["09:00", "17:00"]],
+    "tue": [["09:00", "17:00"]],
+    "wed": [["09:00", "17:00"]],
+    "thu": [["09:00", "17:00"]],
+    "fri": [["09:00", "17:00"]],
+    "sat": [],
+    "sun": []
+  },
+  "slotStep": 30,
+  "minNoticeHours": 12,
+  "maxDaysAhead": 60,
+
+  "modes": {
+    "phone":  { "el": "Τηλεφωνικά", "en": "By phone" },
+    "online": { "el": "Online (βιντεοκλήση)", "en": "Online (video call)" },
+    "onsite": { "el": "Στο κατάστημά σας", "en": "At your venue" }
+  },
+
+  "services": [
+    {
+      "id": "intro",
+      "name": { "el": "Δωρεάν γνωριμία", "en": "Free intro call" },
+      "desc": {
+        "el": "Σύντομη συζήτηση για την επιχείρησή σας και το τι χρειάζεστε. Χωρίς καμία δέσμευση.",
+        "en": "A short conversation about your business and what you need. No commitment."
+      },
+      "price": { "el": "Δωρεάν", "en": "Free" },
+      "duration": 30,
+      "bufferBefore": 0,
+      "bufferAfter": 15,
+      "modes": ["phone", "online"],
+      "approval": false
+    },
+    {
+      "id": "visit",
+      "name": { "el": "Αυτοψία στο κατάστημα", "en": "On-site visit" },
+      "desc": {
+        "el": "Ερχόμαστε στο κατάστημα, βλέπουμε πώς δουλεύει στην πράξη και μιλάμε με εσάς και την ομάδα σας.",
+        "en": "We visit your venue, see how it works in practice and talk with you and your team."
+      },
+      "price": null,
+      "duration": 120,
+      "bufferBefore": 45,
+      "bufferAfter": 45,
+      "modes": ["onsite"],
+      "approval": true
+    },
+    {
+      "id": "demo",
+      "name": { "el": "Παρουσίαση εφαρμογής", "en": "App demo" },
+      "desc": {
+        "el": "Σας δείχνουμε στην πράξη το TableReserve ή το GoFinanceOS και πώς ταιριάζει στη δική σας επιχείρηση.",
+        "en": "We show you TableReserve or GoFinanceOS in action and how it fits your business."
+      },
+      "price": null,
+      "duration": 45,
+      "bufferBefore": 0,
+      "bufferAfter": 15,
+      "modes": ["online", "onsite"],
+      "approval": false,
+      "extra": {
+        "id": "app",
+        "label": { "el": "Ποια εφαρμογή;", "en": "Which app?" },
+        "options": ["TableReserve", "GoFinanceOS"]
+      }
+    },
+    {
+      "id": "training",
+      "name": { "el": "Σεμινάριο προσωπικού", "en": "Staff training" },
+      "desc": {
+        "el": "Εκπαίδευση της ομάδας σας μέσα στο κατάστημα: εξυπηρέτηση, πωλήσεις, υποδοχή, ταμείο.",
+        "en": "Training for your team at your venue: service, upselling, reception, cash desk."
+      },
+      "price": null,
+      "duration": 180,
+      "bufferBefore": 45,
+      "bufferAfter": 45,
+      "modes": ["onsite"],
+      "approval": true,
+      "extra": {
+        "id": "staff",
+        "label": { "el": "Πόσα άτομα προσωπικό;", "en": "How many staff?" },
+        "options": ["1–5", "6–10", "11–20", "20+"]
+      }
+    }
+  ]
+}
