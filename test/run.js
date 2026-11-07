@@ -16,6 +16,11 @@ process.env.ADMIN_KEY_ARAKRON = 'test-admin-key-123456';
 const FIXED = Date.parse('2026-10-05T05:00:00Z');
 Date.now = () => FIXED;
 
+// Οι δοκιμές ελέγχουν τη λογική με σταθερό ωράριο (Δευ–Παρ 09:00–17:00),
+// ανεξάρτητα από το πραγματικό ωράριο που έχει ρυθμίσει η επιχείρηση.
+const TEST_HOURS = { mon: [['09:00', '17:00']], tue: [['09:00', '17:00']], wed: [['09:00', '17:00']], thu: [['09:00', '17:00']], fri: [['09:00', '17:00']], sat: [], sun: [] };
+require('../netlify/functions/_lib/businesses').arakron.hours = TEST_HOURS;
+
 const fn = n => require('../netlify/functions/' + n).handler;
 const call = async (name, body, headers = {}) => {
   const r = await fn(name)({ httpMethod: 'POST', body: JSON.stringify(body), headers, queryStringParameters: {} });
