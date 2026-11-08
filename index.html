@@ -462,8 +462,11 @@
     $('logo').src = c.logo; $('brand').href = c.site;
     $('ftName').textContent = c.name; $('ftSite').href = c.site; $('ftSite').textContent = c.site.replace(/^https?:\/\//, '').replace(/\/$/, '');
     applyLang();
+    // ?service=... ανοίγει κατευθείαν το ημερολόγιο της υπηρεσίας (π.χ. κουμπιά στο site).
+    // Από το κουμπί κράτησης του Google ο πελάτης βλέπει πρώτα όλες τις υπηρεσίες.
     const pre = qs.get('service');
-    if (pre && c.services.some(s => s.id === pre)) pickService(pre); else go(1);
+    const fromGoogle = qs.get('utm_source') === 'google' || qs.has('rwg_token');
+    if (pre && !fromGoogle && c.services.some(s => s.id === pre)) pickService(pre); else go(1);
   })();
 })();
 </script>
