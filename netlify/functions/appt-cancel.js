@@ -1,7 +1,8 @@
 // Ακύρωση από τον πελάτη, με το μυστικό link του email.
 // POST { b, id, t, action: "info" }   -> στοιχεία ραντεβού για εμφάνιση
 // POST { b, id, t, action: "cancel" } -> ακύρωση
-const { loadBusiness, nowLocal } = require('./_lib/core');
+const { nowLocal } = require('./_lib/core');
+const { loadBusiness } = require('./_lib/settings');
 const { json, preflight, parseBody } = require('./_lib/respond');
 const { getDb } = require('./_lib/firebase');
 const { bookingRef, release, sameToken } = require('./_lib/store');
@@ -12,7 +13,7 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return json(405, { error: 'method_not_allowed' });
   const body = parseBody(event);
   if (!body) return json(400, { error: 'bad_request' });
-  const biz = loadBusiness(body.b);
+  const biz = await loadBusiness(body.b);
   const id = String(body.id || '');
   if (!biz || !/^[a-z0-9]{6,40}$/.test(id)) return json(404, { error: 'not_found' });
 

@@ -3,11 +3,14 @@
 // POST { b, key, action: "confirm" | "cancel", id }
 // POST { b, key, action: "block", date, from?, to?, note? }   (χωρίς from/to = όλη η μέρα)
 // POST { b, key, action: "unblock", date, id }
-const { loadBusiness, nowLocal, addDays, toMin, fromMin, str } = require('./_lib/core');
+// POST { b, key, action: "settings" }              -> τρέχουσες ρυθμίσεις για την καρτέλα «Ρυθμίσεις»
+// POST { b, key, action: "saveSettings", settings } -> αποθήκευση (400 { error: "invalid", field } αν κάτι δεν στέκει)
+const { nowLocal, addDays, toMin, fromMin, str } = require('./_lib/core');
 const { json, preflight, parseBody } = require('./_lib/respond');
 const { getDb } = require('./_lib/firebase');
 const { bookingRef, dayRef, release, newId, sameToken } = require('./_lib/store');
 const emails = require('./_lib/emails');
+const { loadBusiness, editable, saveSettings } = require('./_lib/settings');
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -16,7 +19,7 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return json(405, { error: 'method_not_allowed' });
   const body = parseBody(event);
   if (!body) return json(400, { error: 'bad_request' });
-  const biz = loadBusiness(body.b);
+  const biz = await loadBusiness(body.b);
   if (!biz) return json(404, { error: 'not_found' });
 
   const expected = process.env['ADMIN_KEY_' + biz.id.toUpperCase().replace(/-/g, '_')];
@@ -91,6 +94,20 @@ exports.handler = async (event) => {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^x[a-z0-9]+$/.test(id)) return json(400, { error: 'bad_request' });
         await release(db, biz.id, date, id);
         return json(200, { ok: true });
+      }
+
+      case 'settings':
+        return json(200, { settings: editable(biz), bookUrl: '/' + biz.id });
+
+      case 'saveSettings': {
+        let saved;
+        try {
+          saved = await saveSettings(biz.id, body.settings);
+        } catch (e) {
+          if (e.field) return json(400, { error: 'invalid', field: e.field });
+          throw e;
+        }
+        return json(200, { ok: true, settings: editable(saved) });
       }
 
       default:

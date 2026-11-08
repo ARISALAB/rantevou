@@ -1,6 +1,7 @@
 // POST { b, service } -> { today, days: { "2026-10-06": ["09:00","09:30",...], ... } }
 // Υπολογίζει τις ελεύθερες ώρες για όλο το διάστημα κρατήσεων (π.χ. 60 μέρες) με μία ανάγνωση.
-const { loadBusiness, nowLocal, addDays, slotsForDay } = require('./_lib/core');
+const { nowLocal, addDays, slotsForDay } = require('./_lib/core');
+const { loadBusiness, activeServices } = require('./_lib/settings');
 const { json, preflight, parseBody } = require('./_lib/respond');
 const { getDb } = require('./_lib/firebase');
 
@@ -10,9 +11,9 @@ exports.handler = async (event) => {
   const body = parseBody(event);
   if (!body) return json(400, { error: 'bad_request' });
 
-  const biz = loadBusiness(body.b);
+  const biz = await loadBusiness(body.b);
   if (!biz) return json(404, { error: 'not_found' });
-  const svc = biz.services.find(s => s.id === body.service);
+  const svc = activeServices(biz).find(s => s.id === body.service);
   if (!svc) return json(400, { error: 'bad_service' });
 
   try {

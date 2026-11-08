@@ -19,7 +19,7 @@
   *{box-sizing:border-box}[hidden]{display:none!important}
   body{margin:0;background:var(--bg);color:var(--text);font:400 15px/1.5 "Commissioner",system-ui,sans-serif}
   a{color:var(--gold-2)}
-  button,input,select{font:inherit;color:inherit}
+  button,input,select,textarea{font:inherit;color:inherit}
   .wrap{max-width:900px;margin:0 auto;padding:0 16px}
   header{border-bottom:1px solid var(--line)}
   .head{display:flex;align-items:center;gap:12px;height:64px}
@@ -33,7 +33,8 @@
   .btn.no{border-color:#5a2f2a;color:#f3c3ba}
   .btn:disabled{opacity:.5;cursor:wait}
   input,select{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:16px}
-  input:focus,select:focus{outline:none;border-color:var(--gold)}
+  textarea{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:16px;resize:vertical;min-height:64px}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
 
   .login{max-width:380px;margin:12vh auto 0;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px}
   .login h1{font-family:"Noto Serif Display",Georgia,serif;font-weight:400;margin:0 0 6px;font-size:1.6rem}
@@ -84,6 +85,48 @@
   .blk{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:.92rem}
   .blk span{color:var(--muted)}
   .blk .btn{margin-left:auto;padding:5px 10px}
+  .views{display:flex;gap:4px;margin:18px 0 0;border-bottom:1px solid var(--line)}
+  .view{background:none;border:0;border-bottom:2px solid transparent;padding:10px 14px;cursor:pointer;color:var(--muted);font-weight:500;margin-bottom:-1px}
+  .view[aria-selected="true"]{color:var(--text);border-bottom-color:var(--gold)}
+
+  /* Ρυθμίσεις */
+  .set .box{margin:18px 0}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .fld{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .fld>span{font-size:.8rem;color:var(--muted)}
+  .fld.full{grid-column:1 / -1}
+  .fld input,.fld select,.fld textarea{width:100%}
+  .hint{font-size:.8rem;color:var(--muted)}
+  .colorrow{display:flex;gap:8px;align-items:center}
+  .colorrow input[type=color]{width:48px;height:42px;padding:3px;cursor:pointer}
+  .hrow{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+  .hrow:first-of-type{border-top:0}
+  .hrow .dn{display:flex;align-items:center;gap:8px;font-weight:500}
+  .ranges{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .range{display:flex;align-items:center;gap:4px}
+  .range input{padding:7px 8px;width:auto}
+  .closed{color:var(--muted);font-size:.9rem}
+  .x{background:none;border:0;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:2px 6px}
+  .x:hover{color:var(--err)}
+  .link{background:none;border:0;color:var(--gold-2);cursor:pointer;padding:4px 0;font-size:.88rem}
+  .svc{border:1px solid var(--line);border-radius:12px;margin:0 0 10px;background:var(--panel-2)}
+  .svc>summary{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;list-style:none}
+  .svc>summary::-webkit-details-marker{display:none}
+  .svc>summary b{font-weight:600}
+  .svc>summary small{color:var(--muted)}
+  .svc>summary .sp{flex:1}
+  .svc.off>summary b{color:var(--muted);text-decoration:line-through}
+  .svc .body{padding:4px 14px 16px}
+  .checks{display:flex;flex-wrap:wrap;gap:14px}
+  .checks label,.sw{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:.92rem}
+  .checks input,.sw input{width:18px;height:18px;accent-color:var(--gold);margin:0}
+  .savebar{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding:26px 0 16px;display:flex;align-items:center;gap:12px;justify-content:flex-end}
+  .savebar span{color:var(--muted);font-size:.88rem}
+  .bad{border-color:var(--err)!important}
+  @media (max-width:640px){
+    .grid{grid-template-columns:1fr}
+    .hrow{grid-template-columns:1fr}
+  }
   .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--text);color:#111;padding:10px 16px;border-radius:10px;font-weight:500;box-shadow:0 8px 30px rgba(0,0,0,.4)}
 </style>
 </head>
@@ -107,6 +150,11 @@
 </section>
 
 <main class="wrap" id="main" hidden>
+  <nav class="views" role="tablist">
+    <button class="view" type="button" role="tab" data-view="bookings" aria-selected="true">Ραντεβού</button>
+    <button class="view" type="button" role="tab" data-view="settings" aria-selected="false">Ρυθμίσεις</button>
+  </nav>
+  <div id="vBookings">
   <div class="stats" id="stats"></div>
   <div class="tabs" role="tablist" id="tabs"></div>
   <div id="list"></div>
@@ -124,6 +172,8 @@
     </form>
     <div id="blocks" style="margin-top:12px"></div>
   </section>
+  </div>
+  <form class="set" id="vSettings" novalidate hidden></form>
 </main>
 
 <script>
@@ -156,7 +206,7 @@
     document.body.appendChild(el); setTimeout(() => el.remove(), 2400);
   }
   function logout(msg) {
-    store.clear(); KEY = null; data = null;
+    store.clear(); KEY = null; data = null; dirty = false; setView('bookings');
     $('main').hidden = true; $('logout').hidden = true; $('login').hidden = false;
     $('loginErr').textContent = msg || '';
   }
@@ -255,6 +305,209 @@
     try { await api(body); toast('Μπλοκαρίστηκε'); $('bNote').value = ''; await load(); }
     catch (err) { if (err.message !== 'unauthorized') toast('Ελέγξτε ημερομηνία και ώρες'); }
   };
+
+
+  // ================= Ρυθμίσεις =================
+  const DAYS = [['mon', 'Δευτέρα'], ['tue', 'Τρίτη'], ['wed', 'Τετάρτη'], ['thu', 'Πέμπτη'], ['fri', 'Παρασκευή'], ['sat', 'Σάββατο'], ['sun', 'Κυριακή']];
+  const FIELD_MSG = {
+    name: 'Συμπληρώστε το όνομα της επιχείρησης.', phone: 'Το τηλέφωνο δεν είναι σωστό.',
+    ownerEmail: 'Το email ειδοποιήσεων δεν είναι σωστό.', site: 'Η ιστοσελίδα πρέπει να ξεκινά με https://',
+    logo: 'Το λογότυπο πρέπει να είναι link που ξεκινά με https://', accent: 'Διαλέξτε χρώμα.',
+    hours: 'Ελέγξτε το ωράριο: κάθε διάστημα πρέπει να τελειώνει μετά την αρχή του, να μην πέφτει πάνω στο προηγούμενο, και να υπάρχει τουλάχιστον μία ανοιχτή μέρα.',
+    slotStep: 'Διαλέξτε κάθε πόσα λεπτά ξεκινούν τα ραντεβού.', minNoticeHours: 'Η ελάχιστη προειδοποίηση πρέπει να είναι 0–168 ώρες.',
+    maxDaysAhead: 'Οι μέρες κράτησης μπροστά πρέπει να είναι 1–365.',
+    services: 'Ελέγξτε τις υπηρεσίες: κάθε μία θέλει όνομα, διάρκεια 5–600 λεπτά και τουλάχιστον έναν τρόπο. Πρέπει να μείνει τουλάχιστον μία ενεργή.',
+  };
+  let S = null, view = 'bookings', dirty = false;
+
+  document.querySelectorAll('.view').forEach(b => b.onclick = () => setView(b.dataset.view));
+  async function setView(v) {
+    if (view === 'settings' && v !== 'settings' && dirty && !confirm('Έχετε αλλαγές που δεν αποθηκεύτηκαν. Να φύγουν;')) return;
+    view = v;
+    document.querySelectorAll('.view').forEach(b => b.setAttribute('aria-selected', String(b.dataset.view === v)));
+    $('vBookings').hidden = v !== 'bookings'; $('vSettings').hidden = v !== 'settings';
+    if (v === 'settings') {
+      $('vSettings').innerHTML = '<p class="empty">Φόρτωση…</p>';
+      try { S = (await api({ action: 'settings' })).settings; dirty = false; renderSettings(); }
+      catch (e) { if (e.message !== 'unauthorized') $('vSettings').innerHTML = '<p class="empty">Δεν φορτώθηκαν οι ρυθμίσεις. Δοκιμάστε ξανά.</p>'; }
+    } else if (dirty) { dirty = false; }
+  }
+  window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+  const fld = (label, html, cls = '') => `<label class="fld ${cls}"><span>${label}</span>${html}</label>`;
+  const inp = (id, val, attrs = '') => `<input id="${id}" value="${esc(val)}" ${attrs}>`;
+
+  function renderSettings() {
+    const svcMode = Object.entries(S.modes);
+    $('vSettings').innerHTML = `
+      <section class="box">
+        <h2>Στοιχεία επιχείρησης</h2>
+        <p>Εμφανίζονται στη σελίδα κράτησης και στα email προς τους πελάτες.</p>
+        <div class="grid">
+          ${fld('Όνομα', inp('sName', S.name, 'maxlength="80" required'))}
+          ${fld('Τηλέφωνο', inp('sPhone', S.phone, 'type="tel" maxlength="30"'))}
+          ${fld('Υπότιτλος (Ελληνικά)', inp('sTagEl', S.tagline.el, 'maxlength="120" placeholder="π.χ. Κομμωτήριο στο Κουκάκι"'))}
+          ${fld('Υπότιτλος (English)', inp('sTagEn', S.tagline.en, 'maxlength="120"'))}
+          ${fld('Email ειδοποιήσεων', inp('sEmail', S.ownerEmail, 'type="email" maxlength="120" required') + '<small class="hint">Εδώ έρχεται κάθε νέα κράτηση και ακύρωση.</small>')}
+          ${fld('Διεύθυνση', inp('sAddr', S.address, 'maxlength="200"'))}
+          ${fld('Ιστοσελίδα', inp('sSite', S.site, 'type="url" maxlength="300" placeholder="https://"'))}
+          ${fld('Λογότυπο (link εικόνας)', inp('sLogo', S.logo, 'type="url" maxlength="300" placeholder="https://"'))}
+          ${fld('Χρώμα', `<div class="colorrow"><input type="color" id="sAccent" value="${esc(S.accent)}"><span class="hint">Κουμπιά και τονισμοί στη σελίδα κράτησης.</span></div>`)}
+        </div>
+      </section>
+
+      <section class="box">
+        <h2>Ωράριο</h2>
+        <p>Οι ώρες που δέχεστε ραντεβού. Για διάλειμμα μέσα στη μέρα, προσθέστε δεύτερο διάστημα.</p>
+        <div id="hours">${DAYS.map(([d, label]) => hourRow(d, label)).join('')}</div>
+        <button class="link" type="button" id="copyMon">Ίδιο ωράριο με τη Δευτέρα σε όλες τις ανοιχτές μέρες</button>
+      </section>
+
+      <section class="box">
+        <h2>Κανόνες κράτησης</h2>
+        <div class="grid">
+          ${fld('Τα ραντεβού ξεκινούν κάθε', `<select id="sStep">${[10, 15, 20, 30, 45, 60].map(n => `<option value="${n}" ${n === S.slotStep ? 'selected' : ''}>${n} λεπτά</option>`).join('')}</select>`)}
+          ${fld('Ελάχιστη προειδοποίηση (ώρες)', inp('sNotice', S.minNoticeHours, 'type="number" min="0" max="168" step="1" inputmode="numeric"') + '<small class="hint">Π.χ. 12 = δεν κλείνει κανείς ραντεβού για τις επόμενες 12 ώρες.</small>')}
+          ${fld('Κρατήσεις έως (μέρες μπροστά)', inp('sAhead', S.maxDaysAhead, 'type="number" min="1" max="365" step="1" inputmode="numeric"'))}
+        </div>
+      </section>
+
+      <section class="box">
+        <h2>Υπηρεσίες</h2>
+        <p>Ό,τι μπορεί να κλείσει ο πελάτης. Μια υπηρεσία που δεν προσφέρετε πια την απενεργοποιείτε· τα παλιά της ραντεβού μένουν.</p>
+        <div id="svcs">${S.services.map((s, i) => svcCard(s, i, svcMode)).join('')}</div>
+        <button class="btn" type="button" id="addSvc">+ Νέα υπηρεσία</button>
+      </section>
+
+      <div class="savebar"><span id="saveState"></span><button class="btn gold" type="submit" id="saveBtn">Αποθήκευση</button></div>`;
+
+    $('copyMon').onclick = () => {
+      collect(); const mon = S.hours.mon;
+      if (!mon.length) { toast('Η Δευτέρα είναι κλειστή'); return; }
+      DAYS.forEach(([d]) => { if (S.hours[d].length) S.hours[d] = mon.map(r => [...r]); });
+      changed(); renderSettings();
+    };
+    $('addSvc').onclick = () => {
+      collect();
+      S.services.push({ id: '', active: true, name: { el: '', en: '' }, desc: { el: '', en: '' }, price: { el: '', en: '' },
+        duration: 30, bufferBefore: 0, bufferAfter: 0, modes: [Object.keys(S.modes)[0]], approval: false, hasExtra: false, open: true });
+      changed(); renderSettings();
+      const last = $('svcs').lastElementChild; last.scrollIntoView({ behavior: 'smooth', block: 'center' }); last.querySelector('input[data-k="nameEl"]').focus();
+    };
+    $('hours').querySelectorAll('[data-day-open]').forEach(cb => cb.onchange = () => {
+      collect(); const d = cb.dataset.dayOpen;
+      S.hours[d] = cb.checked ? [['09:00', '17:00']] : [];
+      changed(); renderSettings();
+    });
+    $('hours').querySelectorAll('[data-add-range]').forEach(b => b.onclick = () => {
+      collect(); const d = b.dataset.addRange, r = S.hours[d], last = r[r.length - 1];
+      r.push([last ? last[1] : '09:00', last && last[1] < '20:00' ? addH(last[1], 3) : '23:59']);
+      changed(); renderSettings();
+    });
+    $('hours').querySelectorAll('[data-del-range]').forEach(b => b.onclick = () => {
+      collect(); const [d, i] = b.dataset.delRange.split(':');
+      S.hours[d].splice(Number(i), 1); changed(); renderSettings();
+    });
+    $('svcs').querySelectorAll('details').forEach(det => det.ontoggle = () => { S.services[det.dataset.i].open = det.open; });
+    $('svcs').querySelectorAll('[data-k="active"]').forEach(cb => cb.onchange = () => { collect(); changed(); renderSettings(); });
+    $('svcs').querySelectorAll('[data-k="nameEl"]').forEach(x => x.oninput = () => {
+      x.closest('details').querySelector('summary b').textContent = x.value || 'Νέα υπηρεσία';
+    });
+    $('vSettings').oninput = changed;
+    $('vSettings').onchange = changed;
+    $('saveState').textContent = dirty ? 'Υπάρχουν αλλαγές που δεν αποθηκεύτηκαν' : '';
+  }
+  const addH = (t, n) => { const h = Math.min(23, Number(t.slice(0, 2)) + n); return String(h).padStart(2, '0') + t.slice(2); };
+  function changed() { dirty = true; const el = $('saveState'); if (el) el.textContent = 'Υπάρχουν αλλαγές που δεν αποθηκεύτηκαν'; }
+
+  function hourRow(d, label) {
+    const r = S.hours[d] || [];
+    return `<div class="hrow" data-day="${d}">
+      <label class="dn sw"><input type="checkbox" data-day-open="${d}" ${r.length ? 'checked' : ''}>${label}</label>
+      <div class="ranges">${r.length ? r.map((x, i) => `
+        <span class="range"><input type="time" data-r="${i}" data-p="0" value="${esc(x[0])}" aria-label="${label} από">–<input type="time" data-r="${i}" data-p="1" value="${esc(x[1])}" aria-label="${label} έως">
+        ${r.length > 1 ? `<button class="x" type="button" data-del-range="${d}:${i}" aria-label="Αφαίρεση διαστήματος">×</button>` : ''}</span>`).join('')
+        + (r.length < 3 ? `<button class="link" type="button" data-add-range="${d}">+ διάστημα</button>` : '')
+        : '<span class="closed">Κλειστά</span>'}</div>
+    </div>`;
+  }
+
+  function svcCard(s, i, modes) {
+    const k = (key, val, attrs = '') => `<input data-k="${key}" value="${esc(val)}" ${attrs}>`;
+    const mins = s.duration + '′' + (s.price.el ? ' · ' + s.price.el : '');
+    return `<details class="svc ${s.active ? '' : 'off'}" data-i="${i}" ${s.open ? 'open' : ''}>
+      <summary><b>${esc(s.name.el || 'Νέα υπηρεσία')}</b><small>${esc(mins)}</small><span class="sp"></span>
+        <label class="sw" onclick="event.stopPropagation()"><input type="checkbox" data-k="active" ${s.active ? 'checked' : ''}>Ενεργή</label></summary>
+      <div class="body"><div class="grid">
+        ${fld('Όνομα (Ελληνικά)', k('nameEl', s.name.el, 'maxlength="80" required'))}
+        ${fld('Όνομα (English)', k('nameEn', s.name.en, 'maxlength="80" placeholder="Αν μείνει κενό, μπαίνει το ελληνικό"'))}
+        ${fld('Περιγραφή (Ελληνικά)', `<textarea data-k="descEl" maxlength="400">${esc(s.desc.el)}</textarea>`)}
+        ${fld('Περιγραφή (English)', `<textarea data-k="descEn" maxlength="400">${esc(s.desc.en)}</textarea>`)}
+        ${fld('Τιμή (Ελληνικά)', k('priceEl', s.price.el, 'maxlength="40" placeholder="π.χ. 25 € ή Δωρεάν. Κενό = δεν εμφανίζεται"'))}
+        ${fld('Τιμή (English)', k('priceEn', s.price.en, 'maxlength="40"'))}
+        ${fld('Διάρκεια (λεπτά)', k('duration', s.duration, 'type="number" min="5" max="600" step="5" inputmode="numeric"'))}
+        <div class="grid" style="gap:12px">
+          ${fld('Χρόνος πριν (λεπτά)', k('bufferBefore', s.bufferBefore, 'type="number" min="0" max="240" step="5" inputmode="numeric"'))}
+          ${fld('Χρόνος μετά (λεπτά)', k('bufferAfter', s.bufferAfter, 'type="number" min="0" max="240" step="5" inputmode="numeric"'))}
+        </div>
+        <div class="fld full"><span>Πώς γίνεται</span><div class="checks">${modes.map(([m, label]) =>
+          `<label><input type="checkbox" data-mode="${m}" ${s.modes.includes(m) ? 'checked' : ''}>${esc(label)}</label>`).join('')}</div></div>
+        <div class="fld full"><label class="sw"><input type="checkbox" data-k="approval" ${s.approval ? 'checked' : ''}>Θέλει δική μου επιβεβαίωση πριν κλείσει</label>
+          <small class="hint">Αλλιώς το ραντεβού κλείνει αμέσως.${s.hasExtra ? ' Η επιπλέον ερώτηση αυτής της υπηρεσίας μένει όπως είναι.' : ''}</small></div>
+      </div></div>
+    </details>`;
+  }
+
+  // Διαβάζει τη φόρμα πίσω στο S
+  function collect() {
+    const v = id => $(id).value.trim();
+    S.name = v('sName'); S.phone = v('sPhone'); S.tagline = { el: v('sTagEl'), en: v('sTagEn') };
+    S.ownerEmail = v('sEmail'); S.address = v('sAddr'); S.site = v('sSite'); S.logo = v('sLogo'); S.accent = $('sAccent').value;
+    S.slotStep = Number($('sStep').value); S.minNoticeHours = Number(v('sNotice')); S.maxDaysAhead = Number(v('sAhead'));
+    DAYS.forEach(([d]) => {
+      const row = document.querySelector(`.hrow[data-day="${d}"]`);
+      const ins = row.querySelectorAll('input[type=time]');
+      const out = [];
+      ins.forEach(x => { const i = Number(x.dataset.r); (out[i] = out[i] || ['', ''])[Number(x.dataset.p)] = x.value; });
+      S.hours[d] = out;
+    });
+    $('svcs').querySelectorAll('details').forEach(det => {
+      const s = S.services[det.dataset.i], g = key => det.querySelector(`[data-k="${key}"]`);
+      s.open = det.open; s.active = g('active').checked;
+      s.name = { el: g('nameEl').value.trim(), en: g('nameEn').value.trim() };
+      s.desc = { el: g('descEl').value.trim(), en: g('descEn').value.trim() };
+      s.price = { el: g('priceEl').value.trim(), en: g('priceEn').value.trim() };
+      s.duration = Number(g('duration').value); s.bufferBefore = Number(g('bufferBefore').value || 0); s.bufferAfter = Number(g('bufferAfter').value || 0);
+      s.modes = [...det.querySelectorAll('[data-mode]')].filter(x => x.checked).map(x => x.dataset.mode);
+      s.approval = g('approval').checked;
+    });
+  }
+
+  $('vSettings').onsubmit = async e => {
+    e.preventDefault();
+    collect();
+    $('vSettings').querySelectorAll('.bad').forEach(x => x.classList.remove('bad'));
+    const btn = $('saveBtn'); btn.disabled = true;
+    try {
+      const r = await fetch('/.netlify/functions/appt-admin', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ b: B, key: KEY, action: 'saveSettings', settings: S }) });
+      const d = await r.json().catch(() => ({}));
+      if (r.status === 401) { logout('Λάθος κλειδί.'); return; }
+      if (r.status === 400 && d.field) { markBad(d.field); alert(FIELD_MSG[d.field] || 'Κάτι δεν είναι σωστό.'); return; }
+      if (!r.ok) throw new Error('save');
+      const open = S.services.map(s => s.open);
+      S = d.settings; S.services.forEach((s, i) => { s.open = open[i]; });
+      dirty = false; renderSettings(); toast('Αποθηκεύτηκε · ισχύει ήδη στη σελίδα κράτησης');
+      $('bizName').textContent = S.name; document.title = S.name + ' · Ραντεβού';
+    } catch (err) { toast('Σφάλμα αποθήκευσης, δοκιμάστε ξανά'); }
+    finally { btn.disabled = false; }
+  };
+  function markBad(field) {
+    const map = { name: 'sName', phone: 'sPhone', ownerEmail: 'sEmail', site: 'sSite', logo: 'sLogo', minNoticeHours: 'sNotice', maxDaysAhead: 'sAhead', slotStep: 'sStep' };
+    const el = map[field] ? $(map[field]) : field === 'hours' ? $('hours').closest('.box') : field === 'services' ? $('svcs').closest('.box') : null;
+    if (!el) return;
+    el.classList.add('bad'); el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 
   if (KEY) load().catch(() => {});
 })();

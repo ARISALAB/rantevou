@@ -3,6 +3,7 @@
 //   appt/days/{biz}/{date}/{id} -> {s,e,ps,pe,k}  ό,τι πιάνει χρόνο εκείνη τη μέρα
 //                                   k: 'b' ραντεβού, 'x' μπλοκαρισμένο από τον διαχειριστή
 //   appt/rate/{hash}           -> όριο κρατήσεων ανά IP
+//   appt/settings/{biz}        -> ρυθμίσεις από το admin (βλ. settings.js)
 const crypto = require('crypto');
 const { conflicts } = require('./core');
 

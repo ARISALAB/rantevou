@@ -146,5 +146,61 @@ const t = async (label, f) => { await f(); ok++; console.log('✓', label); };
     void part;
   });
 
+  await t('ρυθμίσεις: φόρτωση, έλεγχος, αποθήκευση, εφαρμογή παντού', async () => {
+    const K = { b: 'arakron', key: 'test-admin-key-123456' };
+    assert.equal((await call('appt-admin', { b: 'arakron', key: 'wrong', action: 'settings' })).code, 401);
+    const g = await call('appt-admin', { ...K, action: 'settings' });
+    assert.equal(g.code, 200);
+    const st = g.body.settings;
+    assert.equal(st.services.length, 4); assert.equal(st.ownerEmail, 'info@arakronservices.gr');
+
+    // λάθος email / επικαλυπτόμενες ώρες / καμία ενεργή υπηρεσία -> 400 με το πεδίο
+    const bad = async (patch, field) => {
+      const r = await call('appt-admin', { ...K, action: 'saveSettings', settings: { ...st, ...patch } });
+      assert.equal(r.code, 400, field); assert.equal(r.body.field, field);
+    };
+    await bad({ ownerEmail: 'όχι-email' }, 'ownerEmail');
+    await bad({ hours: { ...st.hours, mon: [['09:00', '13:00'], ['12:00', '15:00']] } }, 'hours');
+    await bad({ services: st.services.map(x => ({ ...x, active: false })) }, 'services');
+    await bad({ site: 'javascript:alert(1)' }, 'site');
+
+    // Σάββατο ανοιχτό, γνωριμία 60', demo κλειστό, νέα υπηρεσία, το «training» λείπει από την αποστολή
+    const services = st.services.filter(x => x.id !== 'training').map(x =>
+      x.id === 'intro' ? { ...x, duration: 60 } : x.id === 'demo' ? { ...x, active: false } : x);
+    services.push({ name: { el: 'Κούρεμα', en: '' }, desc: { el: '', en: '' }, price: { el: '15 €', en: '' }, duration: 30, modes: ['onsite'] });
+    const save = await call('appt-admin', { ...K, action: 'saveSettings', settings: {
+      ...st, name: 'AR Akron (δοκιμή)', hours: { ...st.hours, sat: [['10:00', '14:00']] }, services } });
+    assert.equal(save.code, 200, JSON.stringify(save.body));
+    const sv = save.body.settings.services;
+    assert.equal(sv.length, 5, 'το training μένει, απενεργοποιημένο');
+    assert.equal(sv.find(x => x.id === 'training').active, false);
+    const neu = sv.find(x => x.name.el === 'Κούρεμα');
+    assert(/^s[0-9a-f]{8}$/.test(neu.id)); assert.equal(neu.name.en, 'Κούρεμα'); assert.equal(neu.price.en, '15 €');
+    assert(sv.find(x => x.id === 'demo').hasExtra, 'το extra του demo κρατιέται από το .json');
+
+    const r = await fn('appt-config')({ httpMethod: 'GET', queryStringParameters: { b: 'arakron' } });
+    const c = JSON.parse(r.body);
+    assert.equal(c.name, 'AR Akron (δοκιμή)');
+    assert.deepEqual(c.services.map(x => x.id).sort(), ['intro', 'visit', neu.id].sort());
+    const a = await call('appt-availability', { b: 'arakron', service: 'intro' });
+    assert.equal(a.body.days['2026-10-10'].slice(-1)[0], '13:00', 'Σάββατο 10–14, γνωριμία 60\'');
+    assert.equal((await call('appt-availability', { b: 'arakron', service: 'demo' })).code, 400, 'κλειστή υπηρεσία');
+    const bk = await call('appt-book', { ...base, service: 'demo', date: '2026-10-14', time: '10:00', mode: 'online', extra: 'TableReserve' }, ip(20));
+    assert.equal(bk.code, 400, 'δεν κλείνεται κλειστή υπηρεσία');
+    const ok2 = await call('appt-book', { ...base, service: neu.id, date: '2026-10-10', time: '10:00', mode: 'onsite', address: 'Ερμού 5' }, ip(21));
+    assert.equal(ok2.code, 200, JSON.stringify(ok2.body));
+
+    // Το παλιό ραντεβού demo (ακυρωμένο) ανοίγει ακόμα με το σωστό όνομα υπηρεσίας
+    const db = global.__APPT_TEST_DB__;
+    const info = await call('appt-cancel', { b: 'arakron', id: demo, t: db.data.appt.bookings.arakron[demo].token, action: 'info' });
+    assert.equal(info.body.service.el, 'Παρουσίαση εφαρμογής');
+
+    // Το Firebase δεν κρατά κενούς πίνακες: κλειστές μέρες λείπουν από τη βάση -> μένουν κλειστές
+    delete db.data.appt.settings.arakron.hours.sun;
+    const a2 = await call('appt-availability', { b: 'arakron', service: 'intro' });
+    assert(!a2.body.days['2026-10-11'], 'Κυριακή κλειστή');
+    delete db.data.appt.settings;
+  });
+
   console.log(`\nΌλες οι δοκιμές πέρασαν (${ok}).`);
 })().catch(e => { console.error('✗', e.message); process.exit(1); });

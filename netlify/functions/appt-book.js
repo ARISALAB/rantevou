@@ -1,7 +1,8 @@
 // POST { b, service, date, time, mode, name, phone, email, company, address, extra, notes, lang, consent, website }
 //  -> 200 { ok, id, status: "confirmed" | "pending" }
 //  -> 4xx { error: "bad_request" | "bad_time" | "slot_taken" | "rate_limited" | "not_found" }
-const { loadBusiness, nowLocal, slotsForDay, toMin, interval, str } = require('./_lib/core');
+const { nowLocal, slotsForDay, toMin, interval, str } = require('./_lib/core');
+const { loadBusiness, activeServices } = require('./_lib/settings');
 const { json, preflight, parseBody } = require('./_lib/respond');
 const { getDb } = require('./_lib/firebase');
 const { bookingRef, reserve, release, rateLimited, newId, newToken } = require('./_lib/store');
@@ -16,9 +17,9 @@ exports.handler = async (event) => {
   if (!b) return json(400, { error: 'bad_request' });
   if (b.website) return json(200, { ok: true, id: 'x', status: 'confirmed' });   // honeypot για bots
 
-  const biz = loadBusiness(b.b);
+  const biz = await loadBusiness(b.b);
   if (!biz) return json(404, { error: 'not_found' });
-  const svc = biz.services.find(s => s.id === b.service);
+  const svc = activeServices(biz).find(s => s.id === b.service);
 
   const date = String(b.date || ''), time = String(b.time || ''), mode = String(b.mode || '');
   const name = str(b.name, 100), phone = str(b.phone, 30), email = str(b.email, 120).toLowerCase();

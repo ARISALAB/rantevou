@@ -2,22 +2,16 @@
 // Όλες οι ώρες είναι «ώρα τοίχου» στη ζώνη της επιχείρησης (π.χ. Europe/Athens),
 // αποθηκευμένες ως λεπτά από τα μεσάνυχτα (0–1440) και ημερομηνίες "YYYY-MM-DD".
 
-const BUSINESSES = require('./businesses');
+// Η φόρτωση επιχείρησης (με τις ρυθμίσεις του admin) είναι στο settings.js.
 
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-
-function loadBusiness(id) {
-  id = String(id || '').toLowerCase();
-  if (!/^[a-z0-9_-]{1,40}$/.test(id) || !Object.prototype.hasOwnProperty.call(BUSINESSES, id)) return null;
-  return BUSINESSES[id];
-}
 
 // Ό,τι βλέπει ο επισκέπτης (χωρίς email ιδιοκτήτη κ.λπ.)
 function publicConfig(biz) {
   const { id, name, tagline, site, privacy, logo, icons, phone, theme, modes, services, maxDaysAhead, hours } = biz;
   return {
     id, name, tagline, site, privacy, logo, icons: icons || null, phone, theme, modes, maxDaysAhead, hours,
-    services: services.map(s => ({
+    services: services.filter(s => s.active !== false).map(s => ({
       id: s.id, name: s.name, desc: s.desc, price: s.price, duration: s.duration,
       modes: s.modes, approval: !!s.approval, extra: s.extra || null,
     })),
@@ -83,6 +77,6 @@ const str = (v, max) => (typeof v === 'string' ? v.trim() : '').slice(0, max);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 module.exports = {
-  DAYS, loadBusiness, publicConfig, toMin, fromMin, nowLocal, addDays, dayKey, daysBetween,
+  DAYS, publicConfig, toMin, fromMin, nowLocal, addDays, dayKey, daysBetween,
   interval, conflicts, slotsForDay, str, esc,
 };

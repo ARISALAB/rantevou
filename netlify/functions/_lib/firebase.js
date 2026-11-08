@@ -1,5 +1,5 @@
-// Ίδιο Firebase project με το TableReserve (ίδιες μεταβλητές περιβάλλοντος στο Netlify).
-// Τα δεδομένα των ραντεβού ζουν κάτω από τον κόμβο /appt ώστε να μη μπλέκονται με τις κρατήσεις.
+// Δικό του Firebase project (rantevou), Realtime Database. Τα στοιχεία σύνδεσης είναι στις μεταβλητές του Netlify.
+// Όλα τα δεδομένα ζουν κάτω από τον κόμβο /appt.
 const admin = require('firebase-admin');
 
 let db = null;
