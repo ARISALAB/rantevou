@@ -99,6 +99,7 @@ const t = async (label, f) => { await f(); ok++; console.log('✓', label); };
     assert.equal(cust.to, 'g@example.com'); assert(cust.attachments && cust.attachments.length === 1, 'ics');
     assert(cust.html.includes('calendar.google.com'));
     assert.equal(own.to, 'info@arakronservices.gr');
+    assert.equal(cust.from, '"AR Akron Services" <noreply@tablereserve.gr>');
     assert(!own.html.includes('<script>'), 'escape HTML');
   });
 
@@ -187,8 +188,18 @@ const t = async (label, f) => { await f(); ok++; console.log('✓', label); };
     assert.equal((await call('appt-availability', { b: 'arakron', service: 'demo' })).code, 400, 'κλειστή υπηρεσία');
     const bk = await call('appt-book', { ...base, service: 'demo', date: '2026-10-14', time: '10:00', mode: 'online', extra: 'TableReserve' }, ip(20));
     assert.equal(bk.code, 400, 'δεν κλείνεται κλειστή υπηρεσία');
+    // Το email ειδοποιήσεων και το όνομα αποστολέα έρχονται από τις Ρυθμίσεις της επιχείρησης
+    process.env.EMAIL_FROM = 'AR Akron Services <rantevou@arakronservices.gr>';
+    process.env.OWNER_EMAIL = 'palio@example.com';
+    await call('appt-admin', { ...K, action: 'saveSettings', settings: { ...save.body.settings, ownerEmail: 'kommotirio@example.com' } });
+    global.__APPT_SENT__ = [];
     const ok2 = await call('appt-book', { ...base, service: neu.id, date: '2026-10-10', time: '10:00', mode: 'onsite', address: 'Ερμού 5' }, ip(21));
     assert.equal(ok2.code, 200, JSON.stringify(ok2.body));
+    const [c2, o2] = global.__APPT_SENT__;
+    assert.equal(o2.to, 'kommotirio@example.com', 'όχι το OWNER_EMAIL');
+    assert.equal(c2.reply_to, 'kommotirio@example.com');
+    assert.equal(c2.from, '"AR Akron (δοκιμή)" <rantevou@arakronservices.gr>');
+    delete process.env.EMAIL_FROM; delete process.env.OWNER_EMAIL;
 
     // Το παλιό ραντεβού demo (ακυρωμένο) ανοίγει ακόμα με το σωστό όνομα υπηρεσίας
     const db = global.__APPT_TEST_DB__;

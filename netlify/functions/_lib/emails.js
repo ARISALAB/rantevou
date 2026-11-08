@@ -99,8 +99,16 @@ async function send(msg) {
   const r = await new Resend(process.env.RESEND_API_KEY).emails.send(msg);
   if (r && r.error) console.error('[appt] resend error', r.error);
 }
-const from = biz => process.env.EMAIL_FROM || `${biz.name} <noreply@tablereserve.gr>`;
-const ownerTo = biz => process.env.OWNER_EMAIL || biz.ownerEmail;
+// Αποστολέας: το όνομα είναι ΠΑΝΤΑ της επιχείρησης, η διεύθυνση είναι κοινή για όλη την πλατφόρμα.
+// Το EMAIL_FROM μπορεί να είναι "Όνομα <x@domain>" ή σκέτο "x@domain" — κρατάμε μόνο τη διεύθυνση.
+const senderAddress = () => {
+  const v = String(process.env.EMAIL_FROM || '').trim();
+  const m = v.match(/<([^<>\s]+@[^<>\s]+)>/) || v.match(/^([^<>\s]+@[^<>\s]+)$/);
+  return m ? m[1] : 'noreply@tablereserve.gr';
+};
+const from = biz => `"${String(biz.name || 'Ραντεβού').replace(/["\\<>\r\n]/g, '').slice(0, 80)}" <${senderAddress()}>`;
+// Οι ειδοποιήσεις πάνε στο email που έχει ορίσει η ίδια η επιχείρηση στις Ρυθμίσεις
+const ownerTo = biz => biz.ownerEmail;
 
 // kind: confirmed | pending | approved | cancelled
 async function toCustomer(kind, biz, svc, b) {
