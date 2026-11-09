@@ -1,4 +1,5 @@
-// Ρυθμίσεις επιχείρησης = βασικό .json + όσα αλλάζει ο ίδιος από την καρτέλα «Ρυθμίσεις» του admin.
+// Ρυθμίσεις επιχείρησης = βασικά στοιχεία + όσα αλλάζει ο ίδιος από την καρτέλα «Ρυθμίσεις» του admin.
+// Βασικά στοιχεία: είτε αρχείο .json (businesses/) είτε εγγραφή στη βάση appt/biz/{id} (από το superadmin).
 // Οι αλλαγές αποθηκεύονται στη βάση:  appt/settings/{biz}  (ολόκληρο το επεξεργάσιμο κομμάτι).
 // Αν η βάση δεν απαντήσει, η επιχείρηση δουλεύει με το .json, ώστε η σελίδα κράτησης να μην πέφτει ποτέ.
 const crypto = require('crypto');
@@ -8,10 +9,22 @@ const { getDb } = require('./firebase');
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const settingsRef = (db, id) => db.ref(`appt/settings/${id}`);
 
-function baseBusiness(id) {
+const fileBusiness = id => Object.prototype.hasOwnProperty.call(BUSINESSES, id) ? BUSINESSES[id] : null;
+
+// Βασικά στοιχεία: πρώτα από αρχείο, αλλιώς από τη βάση (επιχειρήσεις του superadmin)
+async function baseBusiness(id) {
   id = String(id || '').toLowerCase();
-  if (!/^[a-z0-9_-]{1,40}$/.test(id) || !Object.prototype.hasOwnProperty.call(BUSINESSES, id)) return null;
-  return BUSINESSES[id];
+  if (!/^[a-z0-9_-]{1,40}$/.test(id)) return null;
+  const file = fileBusiness(id);
+  if (file) return file;
+  try {
+    const rec = (await getDb().ref(`appt/biz/${id}`).get()).val();
+    if (!rec || !rec.base) return null;
+    return { ...rec.base, id, _dyn: true, _active: rec.active !== false, _keyHash: rec.keyHash || '' };
+  } catch (err) {
+    console.error('[settings] δεν διαβάστηκε η επιχείρηση', id, err);
+    return null;
+  }
 }
 
 // Συγχώνευση: ό,τι υπάρχει στις αποθηκευμένες ρυθμίσεις υπερισχύει του .json
@@ -41,9 +54,11 @@ function merge(base, s) {
   return out;
 }
 
-async function loadBusiness(id) {
-  const base = baseBusiness(id);
+// Επιχείρηση σε παύση (από το superadmin) δεν δέχεται κρατήσεις. Το admin της ανοίγει κανονικά.
+async function loadBusiness(id, { includeSuspended = false } = {}) {
+  const base = await baseBusiness(id);
   if (!base) return null;
+  if (base._dyn && !base._active && !includeSuspended) return null;
   try {
     const s = (await settingsRef(getDb(), base.id).get()).val();
     return merge(base, s);
@@ -88,7 +103,7 @@ const int = (v, min, max) => { const n = Number(v); return Number.isInteger(n) &
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 const tmin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const URL_RE = /^https:\/\/[^\s"'<>]+$/;
+const URL_RE = /^(https:\/\/|http:\/\/localhost[:/])[^\s"'<>]+$/;   // localhost μόνο για τις δοκιμές
 
 function fail(msg) { const e = new Error(msg); e.field = msg; throw e; }
 
@@ -205,13 +220,13 @@ function sanitize(input, base) {
 }
 
 async function saveSettings(id, input) {
-  const base = baseBusiness(id);
+  const base = await baseBusiness(id);
   // Η σύγκριση γίνεται με την τρέχουσα εικόνα (μαζί με παλιότερες αποθηκευμένες υπηρεσίες)
-  const current = await loadBusiness(id);
+  const current = await loadBusiness(id, { includeSuspended: true });
   const value = sanitize(input, current);
   value.updatedAt = Date.now();
   await settingsRef(getDb(), base.id).set(value);
   return merge(base, value);
 }
 
-module.exports = { baseBusiness, loadBusiness, activeServices, editable, sanitize, saveSettings, merge };
+module.exports = { baseBusiness, fileBusiness, loadBusiness, activeServices, editable, sanitize, saveSettings, merge };

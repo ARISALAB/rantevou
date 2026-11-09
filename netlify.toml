@@ -16,3 +16,7 @@
   for = "/cancel.html"
   [headers.values]
     X-Robots-Tag = "noindex"
+[[headers]]
+  for = "/superadmin.html"
+  [headers.values]
+    X-Robots-Tag = "noindex"

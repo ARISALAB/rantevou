@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#ECEFF3">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<title>Superadmin · Ραντεβού</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geologica:wght@300..700&display=swap">
+<style>
+  :root{--bg:#ECEFF3;--panel:#F7F8FA;--panel-2:#EEF1F5;--line:#CBD4DF;--text:#161B33;--muted:#4A5170;--pen:#2A3DD1;--marker:#F2DF3A;--ok:#1F8A55;--err:#C93A3A}
+  *{box-sizing:border-box}[hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--text);font:400 15px/1.5 "Geologica",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:var(--pen)}
+  button,input,select{font:inherit;color:inherit}
+  :focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 18px}
+  header{border-bottom:1.5px solid var(--line)}
+  .head{display:flex;align-items:center;gap:12px;height:66px}
+  .head b{font-weight:620;font-size:1.1rem;letter-spacing:-.02em}
+  .head small{display:block;color:var(--muted);font-size:.8rem}
+  .akron{width:34px;height:34px;border-radius:9px;background:#0b0b0c;display:grid;place-items:center;flex:none}
+  .akron img{width:22px;height:22px}
+  .sp{flex:1}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:999px;padding:8px 15px;border:1.5px solid var(--line);background:none;cursor:pointer;text-decoration:none;color:var(--text);font-size:.9rem;white-space:nowrap}
+  .btn:hover{border-color:var(--muted)}
+  .btn.pen{background:var(--pen);border-color:var(--pen);color:#fff;font-weight:550}
+  .btn.sm{padding:5px 11px;font-size:.84rem}
+  .btn:disabled{opacity:.5;cursor:wait}
+  input,select{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:16px}
+  input:focus,select:focus{outline:none;border-color:var(--pen)}
+
+  .login{max-width:380px;margin:12vh auto 0;background:var(--panel);border:1.5px solid var(--line);border-radius:16px;padding:26px}
+  .login h1{font-weight:640;letter-spacing:-.03em;margin:0 0 6px;font-size:1.7rem}
+  .login p{color:var(--muted);margin:0 0 16px}
+  .login input{width:100%;margin:0 0 12px}
+  .login .btn{width:100%;padding:11px}
+  .err{color:var(--err);font-size:.9rem;min-height:1.3em;margin:8px 0 0}
+
+  .views{display:flex;gap:4px;margin:18px 0 0;border-bottom:1.5px solid var(--line)}
+  .view{background:none;border:0;border-bottom:2px solid transparent;padding:10px 14px;cursor:pointer;color:var(--muted);font-weight:500;margin-bottom:-1.5px}
+  .view[aria-selected="true"]{color:var(--text);border-bottom-color:var(--pen)}
+  .view .n{display:inline-block;min-width:20px;padding:0 6px;border-radius:999px;background:var(--marker);color:var(--text);font-size:.75rem;margin-left:6px}
+
+  .box{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:18px;margin:20px 0}
+  .box h2{font-weight:600;letter-spacing:-.02em;font-size:1.2rem;margin:0 0 4px}
+  .box > p{color:var(--muted);margin:0 0 14px;font-size:.92rem}
+  .newform{display:grid;grid-template-columns:1.3fr 1.1fr 1fr auto;gap:10px;align-items:end}
+  .f{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .f span{font-size:.8rem;color:var(--muted)}
+  .f input{width:100%}
+  .idrow{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}
+  .idrow em{font-style:normal;color:var(--muted);padding:0 0 0 10px;font-size:.85rem;white-space:nowrap}
+  .idrow input{border:0;padding-left:2px}
+
+  .result{background:#fff;border:2px solid var(--pen);border-radius:14px;padding:18px;margin:16px 0 0}
+  .result h3{margin:0 0 4px;font-size:1.1rem}
+  .result > p{margin:0 0 12px;color:var(--muted);font-size:.9rem}
+  .kv{display:grid;grid-template-columns:150px 1fr auto;gap:8px 12px;align-items:center;font-size:.92rem}
+  .kv span{color:var(--muted)}
+  .kv code{font:500 .9rem ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--panel-2);padding:6px 9px;border-radius:8px;word-break:break-all}
+  .kv code.key{background:var(--marker)}
+  .msg{margin-top:14px}
+  .msg textarea{width:100%;min-height:150px;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:.9rem;resize:vertical}
+
+  .biz{display:grid;grid-template-columns:1fr auto;gap:6px 16px;padding:14px 0;border-top:1.5px solid var(--line)}
+  .biz:first-child{border-top:0}
+  .biz b{font-weight:600;font-size:1.02rem}
+  .biz .meta{color:var(--muted);font-size:.86rem}
+  .biz .stats{display:flex;gap:16px;font-size:.86rem;color:var(--muted);flex-wrap:wrap}
+  .biz .stats strong{color:var(--text);font-weight:600}
+  .biz .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:flex-start;grid-row:1 / span 3;grid-column:2}
+  .badge{display:inline-block;font-size:.72rem;border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:2px;border:1.5px solid var(--line);color:var(--muted)}
+  .badge.off{background:var(--marker);border-color:transparent;color:#6b4a00}
+  .empty{color:var(--muted);padding:20px 0;text-align:center}
+
+  .lead{display:grid;grid-template-columns:1fr auto;gap:4px 16px;padding:14px 0;border-top:1.5px solid var(--line)}
+  .lead:first-child{border-top:0}
+  .lead b{font-weight:600}
+  .lead .meta{color:var(--muted);font-size:.88rem}
+  .lead .note{grid-column:1 / -1;background:var(--panel-2);border-radius:8px;padding:8px 10px;font-size:.9rem;white-space:pre-wrap}
+  .lead .acts{display:flex;gap:6px;align-items:flex-start;grid-row:1 / span 2;grid-column:2}
+  .lead.won{opacity:.6}
+  .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--text);color:#fff;padding:11px 18px;border-radius:999px;font-weight:500;box-shadow:0 12px 30px -10px rgba(22,27,51,.5);z-index:9}
+  @media (max-width:760px){
+    .newform{grid-template-columns:1fr}
+    .biz,.lead{grid-template-columns:1fr}
+    .biz .acts,.lead .acts{grid-row:auto;grid-column:auto;justify-content:flex-start}
+    .kv{grid-template-columns:1fr auto}
+    .kv span{grid-column:1 / -1;margin-top:6px}
+  }
+</style>
+</head>
+<body>
+<header><div class="wrap head">
+  <span class="akron" aria-hidden="true"><img src="https://www.arakronservices.gr/favicon.svg?v=3" alt=""></span>
+  <div><b>Superadmin</b><small>Πλατφόρμα ραντεβού · AR Akron Services</small></div>
+  <span class="sp"></span>
+  <a class="btn" href="/" target="_blank" rel="noopener">Αρχική ↗</a>
+  <button class="btn" id="logout" type="button" hidden>Έξοδος</button>
+</div></header>
+
+<section class="login" id="login">
+  <h1>Superadmin</h1>
+  <p>Βάλτε το κλειδί SUPERADMIN_KEY.</p>
+  <form id="loginForm">
+    <input id="key" type="password" autocomplete="current-password" placeholder="Κλειδί" required>
+    <button class="btn pen" type="submit">Είσοδος</button>
+    <p class="err" id="loginErr"></p>
+  </form>
+</section>
+
+<main class="wrap" id="main" hidden>
+  <nav class="views" role="tablist">
+    <button class="view" type="button" role="tab" data-view="biz" aria-selected="true">Επιχειρήσεις</button>
+    <button class="view" type="button" role="tab" data-view="leads" aria-selected="false">Αιτήματα<span class="n" id="newLeads" hidden></span></button>
+  </nav>
+
+  <div id="vBiz">
+    <section class="box">
+      <h2>Νέα επιχείρηση</h2>
+      <p>Δημιουργείται αμέσως, χωρίς deploy. Τα υπόλοιπα (υπηρεσίες, ωράριο, προσωπικό, χρώμα) τα στήνετε από το admin της.</p>
+      <form class="newform" id="newForm" novalidate>
+        <label class="f"><span>Όνομα επιχείρησης</span><input id="nName" maxlength="80" placeholder="π.χ. Κομμωτήριο Μαρία" required></label>
+        <label class="f"><span>Email ειδοποιήσεων</span><input id="nEmail" type="email" maxlength="120" placeholder="για τις νέες κρατήσεις" required></label>
+        <label class="f"><span>Link</span><span class="idrow"><em>/</em><input id="nId" maxlength="40" placeholder="kommotirio-maria" spellcheck="false" autocapitalize="off"></span></label>
+        <button class="btn pen" type="submit" id="nBtn">Δημιουργία</button>
+      </form>
+      <p class="err" id="nErr"></p>
+      <div id="result"></div>
+    </section>
+
+    <section class="box">
+      <h2>Επιχειρήσεις</h2>
+      <div id="list"></div>
+    </section>
+  </div>
+
+  <div id="vLeads" hidden>
+    <section class="box">
+      <h2>Αιτήματα από τη φόρμα «Θέλω το σύστημα»</h2>
+      <div id="leads"></div>
+    </section>
+  </div>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const KN = 'appt_super';
+  let KEY = (() => { try { return sessionStorage.getItem(KN); } catch (e) { return null; } })();
+  let data = null, leadId = '', idTouched = false;
+
+  async function api(body) {
+    const r = await fetch('/.netlify/functions/appt-super', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: KEY, ...body }) });
+    const d = await r.json().catch(() => ({}));
+    if (r.status === 401) { logout('Λάθος κλειδί.'); throw new Error('unauthorized'); }
+    return { ok: r.ok, status: r.status, data: d };
+  }
+  function toast(m) { const el = document.createElement('div'); el.className = 'toast'; el.textContent = m; document.body.appendChild(el); setTimeout(() => el.remove(), 2400); }
+  function logout(msg) {
+    try { sessionStorage.removeItem(KN); } catch (e) {}
+    KEY = null; $('main').hidden = true; $('logout').hidden = true; $('login').hidden = false; $('loginErr').textContent = msg || '';
+  }
+  async function copy(text, label) {
+    try { await navigator.clipboard.writeText(text); toast((label || 'Αντιγράφηκε')); } catch (e) { prompt('Αντιγράψτε:', text); }
+  }
+
+  // Ίδιος κανόνας με τον server: «Κομμωτήριο Μαρία» -> kommotirio-maria
+  const GR = { α: 'a', β: 'v', γ: 'g', δ: 'd', ε: 'e', ζ: 'z', η: 'i', θ: 'th', ι: 'i', κ: 'k', λ: 'l', μ: 'm', ν: 'n', ξ: 'x', ο: 'o', π: 'p', ρ: 'r', σ: 's', ς: 's', τ: 't', υ: 'y', φ: 'f', χ: 'ch', ψ: 'ps', ω: 'o' };
+  function slugify(name) {
+    let s = String(name || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    s = s.replace(/ου/g, 'ou').replace(/αι/g, 'ai').replace(/ει/g, 'ei').replace(/οι/g, 'oi').replace(/μπ/g, 'b').replace(/ντ/g, 'nt').replace(/γκ/g, 'gk');
+    s = s.replace(/[α-ω]/g, c => GR[c] || '');
+    return s.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40).replace(/-+$/, '');
+  }
+  $('nName').oninput = () => { if (!idTouched) $('nId').value = slugify($('nName').value); };
+  $('nId').oninput = () => { idTouched = !!$('nId').value; $('nId').value = $('nId').value.toLowerCase().replace(/[^a-z0-9-]/g, ''); };
+
+  async function load() {
+    const r = await api({ action: 'list' });
+    if (!r.ok) throw new Error('load');
+    data = r.data;
+    $('login').hidden = true; $('main').hidden = false; $('logout').hidden = false;
+    render();
+  }
+
+  function render() {
+    const B = data.businesses;
+    $('list').innerHTML = B.length ? B.map(b => `
+      <div class="biz">
+        <div><b>${esc(b.name)}</b>${b.active ? '' : '<span class="badge off">Σε παύση</span>'}${b.source === 'file' ? '<span class="badge" title="Ορίζεται από αρχείο .json στο repo">αρχείο</span>' : ''}</div>
+        <div class="meta">/${esc(b.id)} · ${esc(b.email)}${b.staff ? ` · ${b.staff} άτομα` : ''}${b.created ? ` · από ${new Date(b.created).toLocaleDateString('el-GR')}` : ''}</div>
+        <div class="stats"><span><strong>${b.upcoming}</strong> επόμενα</span><span><strong>${b.last30}</strong> κρατήσεις 30 μέρες</span><span><strong>${b.google30}</strong> από Google</span></div>
+        <div class="acts">
+          <a class="btn sm" href="${esc(b.links.booking)}" target="_blank" rel="noopener">Σελίδα ↗</a>
+          <a class="btn sm" href="${esc(b.links.admin)}" target="_blank" rel="noopener">Admin ↗</a>
+          <button class="btn sm" type="button" data-copy="${esc(b.links.google)}">Link Google</button>
+          ${b.source === 'db' ? `<button class="btn sm" type="button" data-reset="${esc(b.id)}">Νέο κλειδί</button>
+          <button class="btn sm" type="button" data-active="${esc(b.id)}" data-to="${b.active ? '0' : '1'}">${b.active ? 'Παύση' : 'Ενεργοποίηση'}</button>` : ''}
+        </div>
+      </div>`).join('') : '<p class="empty">Καμία επιχείρηση ακόμα.</p>';
+    $('list').querySelectorAll('[data-copy]').forEach(b => b.onclick = () => copy(b.dataset.copy, 'Αντιγράφηκε το link για το Google'));
+    $('list').querySelectorAll('[data-reset]').forEach(b => b.onclick = async () => {
+      const biz = B.find(x => x.id === b.dataset.reset);
+      if (!confirm(`Νέο κλειδί για «${biz.name}»;\nΤο παλιό κλειδί σταματά να δουλεύει αμέσως.`)) return;
+      b.disabled = true;
+      try { const r = await api({ action: 'resetKey', id: biz.id }); if (r.ok) { showResult(r.data, true); window.scrollTo({ top: 0, behavior: 'smooth' }); } else toast('Σφάλμα'); }
+      catch (e) {} finally { b.disabled = false; }
+    });
+    $('list').querySelectorAll('[data-active]').forEach(b => b.onclick = async () => {
+      const biz = B.find(x => x.id === b.dataset.active), on = b.dataset.to === '1';
+      if (!on && !confirm(`Παύση της «${biz.name}»;\nΗ σελίδα κράτησης δεν θα ανοίγει. Τα δεδομένα και το admin μένουν.`)) return;
+      b.disabled = true;
+      try { await api({ action: 'setActive', id: biz.id, active: on }); toast(on ? 'Ενεργοποιήθηκε' : 'Σε παύση'); await load(); } catch (e) { b.disabled = false; }
+    });
+
+    const L = data.leads, newCount = L.filter(l => !l.status || l.status === 'new').length;
+    $('newLeads').hidden = !newCount; $('newLeads').textContent = newCount;
+    const STAFF = { '1': 'μόνος/η', '2-5': '2–5 άτομα', '6+': '6+ άτομα' };
+    $('leads').innerHTML = L.length ? L.map(l => `
+      <div class="lead ${l.status === 'won' ? 'won' : ''}">
+        <div><b>${esc(l.business)}</b> · ${esc(l.name)}${l.profession ? ' · ' + esc(l.profession) : ''}</div>
+        <div class="meta"><a href="tel:${esc(l.phone)}">${esc(l.phone)}</a> · <a href="mailto:${esc(l.email)}">${esc(l.email)}</a>${l.city ? ' · ' + esc(l.city) : ''}${l.staff ? ' · ' + (STAFF[l.staff] || esc(l.staff)) : ''} · ${new Date(l.created).toLocaleDateString('el-GR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>
+        ${l.message ? `<div class="note">${esc(l.message)}</div>` : ''}
+        <div class="acts">
+          <select data-lead="${esc(l.id)}" aria-label="Κατάσταση">
+            ${[['new', 'Νέο'], ['contacted', 'Μιλήσαμε'], ['won', 'Έγινε πελάτης'], ['lost', 'Δεν προχώρησε']].map(([v, t]) => `<option value="${v}" ${(l.status || 'new') === v ? 'selected' : ''}>${t}</option>`).join('')}
+          </select>
+          ${l.business && l.status !== 'won' ? `<button class="btn sm" type="button" data-make="${esc(l.id)}">Δημιουργία επιχείρησης</button>` : ''}
+        </div>
+      </div>`).join('') : '<p class="empty">Κανένα αίτημα ακόμα.</p>';
+    $('leads').querySelectorAll('[data-lead]').forEach(s => s.onchange = async () => {
+      try { await api({ action: 'setLead', id: s.dataset.lead, status: s.value }); const l = L.find(x => x.id === s.dataset.lead); l.status = s.value; render(); toast('Αποθηκεύτηκε'); } catch (e) {}
+    });
+    $('leads').querySelectorAll('[data-make]').forEach(b => b.onclick = () => {
+      const l = L.find(x => x.id === b.dataset.make);
+      leadId = l.id; idTouched = false;
+      $('nName').value = l.business; $('nEmail').value = l.email; $('nId').value = slugify(l.business);
+      setView('biz'); $('nName').focus(); window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  function showResult(d, isReset) {
+    const msg = `Καλησπέρα! Η σελίδα κρατήσεων για «${d.name || ''}» είναι έτοιμη.
+
+Σελίδα κράτησης (για Instagram, Facebook, site):
+${d.links.booking}
+
+Διαχείριση ραντεβού και ρυθμίσεις:
+${d.links.admin}
+Κλειδί εισόδου: ${d.key}
+
+Κρατήστε το κλειδί κάπου ασφαλές. Για οτιδήποτε, είμαι εδώ.`;
+    $('result').innerHTML = `
+      <div class="result">
+        <h3>${isReset ? 'Νέο κλειδί' : 'Δημιουργήθηκε'}: ${esc(d.name || d.id)}</h3>
+        <p>Το κλειδί φαίνεται μόνο τώρα. Αντιγράψτε το και στείλτε το στον πελάτη.</p>
+        <div class="kv">
+          <span>Κλειδί admin</span><code class="key">${esc(d.key)}</code><button class="btn sm" type="button" data-c="${esc(d.key)}">Αντιγραφή</button>
+          <span>Admin</span><code>${esc(d.links.admin)}</code><button class="btn sm" type="button" data-c="${esc(d.links.admin)}">Αντιγραφή</button>
+          <span>Σελίδα κράτησης</span><code>${esc(d.links.booking)}</code><button class="btn sm" type="button" data-c="${esc(d.links.booking)}">Αντιγραφή</button>
+          <span>Link για το Google</span><code>${esc(d.links.google)}</code><button class="btn sm" type="button" data-c="${esc(d.links.google)}">Αντιγραφή</button>
+        </div>
+        <div class="msg"><label class="f"><span>Μήνυμα για τον πελάτη</span><textarea id="msgTxt">${esc(msg)}</textarea></label>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+            <button class="btn pen sm" type="button" id="msgCopy">Αντιγραφή μηνύματος</button>
+            <a class="btn sm" href="${esc(d.links.admin)}" target="_blank" rel="noopener">Άνοιγμα admin για στήσιμο ↗</a>
+          </div></div>
+      </div>`;
+    $('result').querySelectorAll('[data-c]').forEach(b => b.onclick = () => copy(b.dataset.c));
+    $('msgCopy').onclick = () => copy($('msgTxt').value, 'Αντιγράφηκε το μήνυμα');
+  }
+
+  $('newForm').onsubmit = async e => {
+    e.preventDefault();
+    const name = $('nName').value.trim(), email = $('nEmail').value.trim(), id = $('nId').value.trim() || slugify(name);
+    $('nErr').textContent = '';
+    if (!name) return $('nErr').textContent = 'Γράψτε το όνομα της επιχείρησης.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return $('nErr').textContent = 'Ελέγξτε το email.';
+    const btn = $('nBtn'); btn.disabled = true;
+    try {
+      const r = await api({ action: 'create', name, email, id, leadId });
+      if (r.status === 409) return $('nErr').textContent = `Υπάρχει ήδη επιχείρηση με link /${id}. Αλλάξτε το link.`;
+      if (r.status === 400) return $('nErr').textContent = r.data.field === 'id' ? 'Το link θέλει λατινικά πεζά, αριθμούς και παύλες (2–40 χαρακτήρες), και να μην είναι δεσμευμένη λέξη.' : 'Ελέγξτε όνομα και email.';
+      if (!r.ok) return $('nErr').textContent = 'Σφάλμα. Δοκιμάστε ξανά.';
+      showResult(r.data, false);
+      $('newForm').reset(); idTouched = false; leadId = '';
+      await load();
+    } catch (err) {} finally { btn.disabled = false; }
+  };
+
+  document.querySelectorAll('.view').forEach(b => b.onclick = () => setView(b.dataset.view));
+  function setView(v) {
+    document.querySelectorAll('.view').forEach(b => b.setAttribute('aria-selected', String(b.dataset.view === v)));
+    $('vBiz').hidden = v !== 'biz'; $('vLeads').hidden = v !== 'leads';
+  }
+  $('loginForm').onsubmit = async e => {
+    e.preventDefault();
+    KEY = $('key').value.trim(); $('loginErr').textContent = '';
+    try { await load(); try { sessionStorage.setItem(KN, KEY); } catch (x) {} $('key').value = ''; }
+    catch (err) { if (err.message !== 'unauthorized') $('loginErr').textContent = 'Δεν ήταν δυνατή η σύνδεση.'; }
+  };
+  $('logout').onclick = () => logout();
+  if (KEY) load().catch(() => {});
+})();
+</script>
+</body>
+</html>

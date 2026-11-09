@@ -13,6 +13,7 @@ const { FakeDb } = require('./fake-db');
 global.__APPT_TEST_DB__ = new FakeDb();
 global.__APPT_SENT__ = [];
 process.env.ADMIN_KEY_ARAKRON = process.env.ADMIN_KEY_ARAKRON || 'dev-admin-key-123456';
+process.env.SUPERADMIN_KEY = process.env.SUPERADMIN_KEY || 'dev-super-key-1234567890';
 
 const ROOT = path.join(__dirname, '..');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.txt': 'text/plain', '.xml': 'application/xml' };

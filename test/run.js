@@ -11,6 +11,7 @@ const { FakeDb } = require('./fake-db');
 global.__APPT_TEST_DB__ = new FakeDb();
 global.__APPT_SENT__ = [];
 process.env.ADMIN_KEY_ARAKRON = 'test-admin-key-123456';
+process.env.SUPERADMIN_KEY = 'test-super-key-1234567890';
 
 // Δευτέρα 5/10/2026, 08:00 ώρα Αθήνας (05:00 UTC)
 const FIXED = Date.parse('2026-10-05T05:00:00Z');
@@ -301,6 +302,66 @@ const t = async (label, f) => { await f(); ok++; console.log('✓', label); };
     assert(list.body.blocks.some(x => x.staff === 'maria' && x.note === 'Άδεια'));
     assert.equal(list.body.bookings.find(x => x.id === bm.body.id).staff, 'maria');
     delete global.__APPT_TEST_DB__.data.appt.settings;
+  });
+
+  await t('superadmin: νέα επιχείρηση στη βάση, κλειδί με hash, παύση, επαναφορά κλειδιού', async () => {
+    const S = { key: 'test-super-key-1234567890' };
+    const { slugify } = require('../netlify/functions/_lib/template');
+    assert.equal(slugify('Κομμωτήριο Μαρία'), 'kommotirio-maria');
+    assert.equal(slugify('Γυμναστήριο «Ουρανός» & Pilates'), 'gymnastirio-ouranos-pilates');
+    assert.equal((await call('appt-super', { key: 'wrong-key-wrong-key', action: 'list' })).code, 401);
+    assert.equal((await call('appt-super', { ...S, action: 'create', name: 'X', email: 'x@example.com', id: 'admin' })).body.field, 'id', 'δεσμευμένο id');
+    assert.equal((await call('appt-super', { ...S, action: 'create', name: 'AR', email: 'x@example.com', id: 'arakron' })).code, 409, 'υπάρχει ως αρχείο');
+
+    const c = await call('appt-super', { ...S, action: 'create', name: 'Κομμωτήριο Μαρία', email: 'Maria@Example.com' });
+    assert.equal(c.code, 200, JSON.stringify(c.body));
+    assert.equal(c.body.id, 'kommotirio-maria'); assert.equal(c.body.key.length, 32);
+    assert(c.body.links.google.endsWith('/kommotirio-maria?utm_source=google&utm_medium=gbp'));
+    const rec = global.__APPT_TEST_DB__.data.appt.biz['kommotirio-maria'];
+    assert(!JSON.stringify(rec).includes(c.body.key), 'το κλειδί δεν αποθηκεύεται καθαρό');
+    assert.equal((await call('appt-super', { ...S, action: 'create', name: 'Κομμωτήριο Μαρία', email: 'm@example.com' })).code, 409, 'διπλό id');
+
+    // Δουλεύει όπως κάθε επιχείρηση
+    const cfg = await fn('appt-config')({ httpMethod: 'GET', queryStringParameters: { b: 'kommotirio-maria' } });
+    const cj = JSON.parse(cfg.body);
+    assert.equal(cfg.statusCode, 200); assert.equal(cj.name, 'Κομμωτήριο Μαρία'); assert.equal(cj.theme.mode, 'light');
+    assert(!('_keyHash' in cj) && !JSON.stringify(cj).includes('keyHash'));
+    const av = await call('appt-availability', { b: 'kommotirio-maria', service: 'rantevou' });
+    assert.equal(av.body.days['2026-10-06'][0], '09:00');
+    global.__APPT_SENT__ = [];
+    const bk = await call('appt-book', { ...base, b: 'kommotirio-maria', service: 'rantevou', date: '2026-10-06', time: '09:00', mode: 'inshop' }, ip(60));
+    assert.equal(bk.code, 200, JSON.stringify(bk.body));
+    assert.equal(global.__APPT_SENT__[1].to, 'maria@example.com');
+    assert(global.__APPT_SENT__[1].from.startsWith('"Κομμωτήριο Μαρία"'));
+
+    const A = { b: 'kommotirio-maria', key: c.body.key };
+    assert.equal((await call('appt-admin', { ...A, action: 'list' })).code, 200, 'admin με το κλειδί');
+    assert.equal((await call('appt-admin', { ...A, key: 'test-admin-key-123456', action: 'list' })).code, 401, 'όχι με κλειδί άλλης επιχείρησης');
+    const st = (await call('appt-admin', { ...A, action: 'settings' })).body.settings;
+    assert.equal((await call('appt-admin', { ...A, action: 'saveSettings', settings: { ...st, phone: '2101234567', mode: 'dark' } })).code, 200);
+
+    // Λίστα με στατιστικά
+    const list = await call('appt-super', { ...S, action: 'list' });
+    const row = list.body.businesses.find(x => x.id === 'kommotirio-maria');
+    assert.equal(row.source, 'db'); assert.equal(row.active, true); assert.equal(row.last30, 1);
+    assert(list.body.businesses.some(x => x.id === 'arakron' && x.source === 'file'));
+    assert(list.body.leads.length >= 1, 'αιτήματα από τη φόρμα');
+    assert.equal((await call('appt-super', { ...S, action: 'setLead', id: list.body.leads[0].id, status: 'contacted' })).code, 200);
+
+    // Παύση: κλειστή η σελίδα κράτησης, ανοιχτό το admin
+    await call('appt-super', { ...S, action: 'setActive', id: 'kommotirio-maria', active: false });
+    assert.equal((await fn('appt-config')({ httpMethod: 'GET', queryStringParameters: { b: 'kommotirio-maria' } })).statusCode, 404);
+    assert.equal((await call('appt-book', { ...base, b: 'kommotirio-maria', service: 'rantevou', date: '2026-10-06', time: '10:00', mode: 'inshop' }, ip(61))).code, 404);
+    assert.equal((await call('appt-admin', { ...A, action: 'list' })).code, 200);
+    await call('appt-super', { ...S, action: 'setActive', id: 'kommotirio-maria', active: true });
+    assert.equal((await fn('appt-config')({ httpMethod: 'GET', queryStringParameters: { b: 'kommotirio-maria' } })).statusCode, 200);
+
+    // Νέο κλειδί: το παλιό σταματά να δουλεύει
+    const rk = await call('appt-super', { ...S, action: 'resetKey', id: 'kommotirio-maria' });
+    assert.equal(rk.code, 200); assert.notEqual(rk.body.key, c.body.key);
+    assert.equal((await call('appt-admin', { ...A, action: 'list' })).code, 401);
+    assert.equal((await call('appt-admin', { ...A, key: rk.body.key, action: 'list' })).code, 200);
+    assert.equal((await call('appt-super', { ...S, action: 'resetKey', id: 'arakron' })).code, 400, 'όχι για επιχείρηση από αρχείο');
   });
 
   console.log(`\nΌλες οι δοκιμές πέρασαν (${ok}).`);

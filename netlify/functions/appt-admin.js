@@ -12,18 +12,17 @@ const { bookingRef, dayRef, release, newId, sameToken } = require('./_lib/store'
 const emails = require('./_lib/emails');
 const { loadBusiness, editable, saveSettings } = require('./_lib/settings');
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+const { adminKeyOk, sleep } = require('./_lib/auth');
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return preflight();
   if (event.httpMethod !== 'POST') return json(405, { error: 'method_not_allowed' });
   const body = parseBody(event);
   if (!body) return json(400, { error: 'bad_request' });
-  const biz = await loadBusiness(body.b);
+  const biz = await loadBusiness(body.b, { includeSuspended: true });
   if (!biz) return json(404, { error: 'not_found' });
 
-  const expected = process.env['ADMIN_KEY_' + biz.id.toUpperCase().replace(/-/g, '_')];
-  if (!expected || expected.length < 12 || !sameToken(expected, body.key)) {
+  if (!adminKeyOk(biz, body.key)) {
     await sleep(600);
     return json(401, { error: 'unauthorized' });
   }

@@ -49,7 +49,7 @@ function calendarLink(biz, svc, b, lang) {
     dates: `${stamp(b.date, b.s)}/${stamp(b.date, b.e)}`,
     ctz: biz.timezone,
     details: `${biz.name} · ${biz.phone || ''}`,
-    location: b.mode === 'onsite' ? (b.address || '') : biz.modes[b.mode][lang],
+    location: b.mode === 'onsite' ? (b.address || '') : b.mode === 'inshop' && biz.address ? biz.address : biz.modes[b.mode][lang],
   });
   return 'https://calendar.google.com/calendar/render?' + p.toString();
 }
@@ -61,7 +61,7 @@ function ics(biz, svc, b, lang, cancelled) {
     `UID:${b.id}@rantevou`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').slice(0, 15)}Z`,
     `DTSTART;TZID=${biz.timezone}:${stamp(b.date, b.s)}`, `DTEND;TZID=${biz.timezone}:${stamp(b.date, b.e)}`,
     `SUMMARY:${svc.name[lang]} – ${biz.name}`.replace(/[,;]/g, ' '),
-    `LOCATION:${(b.mode === 'onsite' ? b.address || '' : biz.modes[b.mode][lang]).replace(/[,;]/g, ' ')}`,
+    `LOCATION:${(b.mode === 'onsite' ? b.address || '' : b.mode === 'inshop' && biz.address ? biz.address : biz.modes[b.mode][lang]).replace(/[,;]/g, ' ')}`,
     `STATUS:${cancelled ? 'CANCELLED' : 'CONFIRMED'}`, 'END:VEVENT', 'END:VCALENDAR',
   ].join('\r\n');
 }
