@@ -22,7 +22,7 @@ function merge(base, s) {
   ['name', 'phone', 'ownerEmail', 'address', 'site', 'logo', 'hours', 'slotStep', 'minNoticeHours', 'maxDaysAhead']
     .forEach(k => { if (s[k] !== undefined) out[k] = s[k]; });
   if (s.tagline) out.tagline = { ...(base.tagline || {}), ...s.tagline };
-  if (s.accent) out.theme = { ...(base.theme || {}), accent: s.accent };
+  if (s.accent || s.mode) out.theme = { ...(base.theme || {}), ...(s.accent ? { accent: s.accent } : {}), ...(s.mode ? { mode: s.mode } : {}) };
   if (Array.isArray(s.services) && s.services.length) {
     // Το «extra» (π.χ. «Ποια εφαρμογή;») μένει από το .json, δεν αλλάζει από το admin
     out.services = s.services.map(x => ({ ...x, extra: baseSvc(x.id).extra || null }));
@@ -52,7 +52,8 @@ function editable(biz) {
     name: biz.name || '',
     tagline: { el: (biz.tagline || {}).el || '', en: (biz.tagline || {}).en || '' },
     phone: biz.phone || '', ownerEmail: biz.ownerEmail || '', address: biz.address || '',
-    site: biz.site || '', logo: biz.logo || '', accent: (biz.theme || {}).accent || '#c9a24a',
+    site: biz.site || '', logo: biz.logo || '', accent: (biz.theme || {}).accent || '#2a3dd1',
+    mode: (biz.theme || {}).mode === 'dark' ? 'dark' : 'light',
     hours: biz.hours, slotStep: biz.slotStep || 30,
     minNoticeHours: biz.minNoticeHours || 0, maxDaysAhead: biz.maxDaysAhead || 60,
     modes: Object.fromEntries(Object.entries(biz.modes || {}).map(([k, v]) => [k, v.el])),
@@ -94,6 +95,7 @@ function sanitize(input, base) {
   out.logo = txt(i.logo, 300);
   if (out.logo && !URL_RE.test(out.logo)) fail('logo');
   out.accent = /^#[0-9a-fA-F]{6}$/.test(i.accent) ? i.accent.toLowerCase() : fail('accent');
+  out.mode = i.mode === 'dark' ? 'dark' : 'light';
 
   // Ωράριο: έως 3 διαστήματα τη μέρα, σε σειρά, χωρίς επικάλυψη
   const h = i.hours || {};

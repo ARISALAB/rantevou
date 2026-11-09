@@ -7,37 +7,41 @@
 <link rel="icon" href="/favicon.ico" sizes="48x48" id="icoIco">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" id="icoSvg">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" id="icoApple">
-<meta name="theme-color" content="#0b0b0c">
+<meta name="theme-color" content="#ECEFF3">
 <meta name="apple-mobile-web-app-title" content="Ραντεβού">
 <link rel="manifest" href="/admin.webmanifest">
 <title>Ραντεβού · Διαχείριση</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600&family=Noto+Serif+Display:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geologica:wght@300..700&display=swap">
 <style>
-  :root{--bg:#0b0b0c;--panel:#141416;--panel-2:#1b1b1e;--line:#2a2a2e;--text:#f3efe6;--muted:#a39e93;--gold:#c9a24a;--gold-2:#e2c27a;--ok:#6fbf8e;--warn:#e6b85c;--err:#e07a6a}
+  :root{--bg:#ECEFF3;--panel:#F7F8FA;--panel-2:#EEF1F5;--line:#CBD4DF;--text:#161B33;--muted:#4A5170;--gold:#2A3DD1;--gold-2:#2A3DD1;--marker:#F2DF3A;--ok:#1F8A55;--warn:#9A6A00;--err:#C93A3A}
   *{box-sizing:border-box}[hidden]{display:none!important}
-  body{margin:0;background:var(--bg);color:var(--text);font:400 15px/1.5 "Commissioner",system-ui,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--text);font:400 15px/1.5 "Geologica",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
   a{color:var(--gold-2)}
   button,input,select,textarea{font:inherit;color:inherit}
   .wrap{max-width:900px;margin:0 auto;padding:0 16px}
-  header{border-bottom:1px solid var(--line)}
+  header{border-bottom:1.5px solid var(--line)}
   .head{display:flex;align-items:center;gap:12px;height:64px}
-  .head b{font-family:"Noto Serif Display",Georgia,serif;font-weight:400;font-size:1.2rem}
+  .head b{font-weight:620;font-size:1.12rem;letter-spacing:-.02em}
+  .akron{width:34px;height:34px;border-radius:9px;background:#0b0b0c;display:grid;place-items:center;flex:none}
+  .akron img{width:22px;height:22px}
+  .made{font-size:.78rem;color:var(--muted);text-decoration:none}
+  .made:hover{color:var(--text)}
   .head small{color:var(--muted)}
   .head .sp{flex:1}
-  .btn{display:inline-flex;align-items:center;gap:6px;border-radius:9px;padding:8px 13px;border:1px solid var(--line);background:none;cursor:pointer;text-decoration:none;color:var(--text);font-size:.9rem;white-space:nowrap}
+  .btn{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:8px 15px;border:1.5px solid var(--line);background:none;cursor:pointer;text-decoration:none;color:var(--text);font-size:.9rem;white-space:nowrap}
   .btn:hover{border-color:var(--muted)}
-  .btn.gold{background:var(--gold);border-color:var(--gold);color:#111;font-weight:600}
-  .btn.ok{border-color:#2f5a3e;color:#bfe8cd}
-  .btn.no{border-color:#5a2f2a;color:#f3c3ba}
+  .btn.gold{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:550}
+  .btn.ok{border-color:#9fd2b5;color:#14653d;background:#e6f4ec}
+  .btn.no{border-color:#ebb7b1;color:#a12a2a}
   .btn:disabled{opacity:.5;cursor:wait}
-  input,select{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:16px}
-  textarea{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:16px;resize:vertical;min-height:64px}
+  input,select{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;font-size:16px}
+  textarea{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;font-size:16px;resize:vertical;min-height:64px}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
 
-  .login{max-width:380px;margin:12vh auto 0;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px}
-  .login h1{font-family:"Noto Serif Display",Georgia,serif;font-weight:400;margin:0 0 6px;font-size:1.6rem}
+  .login{max-width:380px;margin:12vh auto 0;background:var(--panel);border:1.5px solid var(--line);border-radius:16px;padding:26px}
+  .login h1{font-weight:640;letter-spacing:-.03em;margin:0 0 6px;font-size:1.7rem}
   .login p{color:var(--muted);margin:0 0 16px}
   .login input{width:100%;margin:0 0 10px}
   .login label{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:.88rem;margin:0 0 14px}
@@ -45,8 +49,8 @@
   .err{color:var(--err);font-size:.9rem;min-height:1.3em;margin:8px 0 0}
 
   .tabs{display:flex;gap:6px;margin:22px 0 16px;flex-wrap:wrap}
-  .tab{border:1px solid var(--line);background:none;border-radius:20px;padding:6px 14px;cursor:pointer;color:var(--muted)}
-  .tab[aria-selected="true"]{background:var(--text);color:#111;border-color:var(--text);font-weight:600}
+  .tab{border:1.5px solid var(--line);background:none;border-radius:20px;padding:6px 14px;cursor:pointer;color:var(--muted)}
+  .tab[aria-selected="true"]{background:var(--text);color:#fff;border-color:var(--text);font-weight:600}
   .tab .n{opacity:.7;margin-left:4px}
 
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:22px 0 0}
@@ -55,7 +59,8 @@
   .stat span{color:var(--muted);font-size:.82rem}
 
   .day{margin:0 0 18px}
-  .day h3{font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin:0 0 8px;font-weight:500}
+  .day h3{font-size:.95rem;color:var(--text);margin:0 0 8px;font-weight:600}
+  .day h3::first-letter{text-transform:uppercase}
   .bk{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 8px;display:grid;grid-template-columns:76px 1fr auto;gap:4px 14px;align-items:start}
   .bk.cancelled{opacity:.5}
   .bk .tm{font-weight:600;font-size:1.05rem}
@@ -66,10 +71,10 @@
   .bk .more{grid-column:2 / -1;font-size:.9rem;color:var(--muted)}
   .bk .notes{grid-column:2 / -1;background:var(--panel-2);border-radius:8px;padding:8px 10px;font-size:.9rem;white-space:pre-wrap}
   .badge{display:inline-block;font-size:.72rem;border-radius:20px;padding:1px 8px;margin-left:6px;vertical-align:2px;border:1px solid}
-  .badge.pending{color:var(--warn);border-color:#5a4a26}
-  .badge.confirmed{color:var(--ok);border-color:#2f5a3e}
-  .badge.cancelled{color:var(--err);border-color:#5a2f2a}
-  .badge.src{color:#9ec5ff;border-color:#2a3f5a}
+  .badge.pending{color:#6b4a00;border-color:transparent;background:var(--marker)}
+  .badge.confirmed{color:var(--ok);border-color:#9fd2b5}
+  .badge.cancelled{color:var(--err);border-color:#ebb7b1}
+  .badge.src{color:var(--gold);border-color:#b9c1f2}
   @media (max-width:640px){
     .bk{grid-template-columns:60px 1fr}
     .bk .acts{grid-column:1 / -1;justify-content:flex-start;margin-top:6px}
@@ -79,7 +84,7 @@
   .empty{color:var(--muted);padding:30px 0;text-align:center}
 
   .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin:30px 0}
-  .box h2{font-family:"Noto Serif Display",Georgia,serif;font-weight:400;font-size:1.25rem;margin:0 0 4px}
+  .box h2{font-weight:600;letter-spacing:-.02em;font-size:1.2rem;margin:0 0 4px}
   .box p{color:var(--muted);margin:0 0 12px;font-size:.9rem}
   .blockform{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .blockform input[type=text]{flex:1;min-width:160px}
@@ -128,12 +133,13 @@
     .grid{grid-template-columns:1fr}
     .hrow{grid-template-columns:1fr}
   }
-  .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--text);color:#111;padding:10px 16px;border-radius:10px;font-weight:500;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+  .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--text);color:#fff;padding:11px 18px;border-radius:999px;font-weight:500;box-shadow:0 12px 30px -10px rgba(22,27,51,.5)}
 </style>
 </head>
 <body>
 <header><div class="wrap head">
-  <div><b id="bizName">Ραντεβού</b><br><small>Διαχείριση</small></div>
+  <span class="akron" aria-hidden="true"><img src="https://www.arakronservices.gr/favicon.svg?v=3" alt=""></span>
+  <div><b id="bizName">Ραντεβού</b><br><a class="made" href="https://rantevou.arakronservices.gr/" target="_blank" rel="noopener">Διαχείριση ραντεβού · AR Akron Services</a></div>
   <span class="sp"></span>
   <a class="btn" id="bookLink" href="/" target="_blank" rel="noopener">Σελίδα κράτησης ↗</a>
   <button class="btn" id="logout" type="button" hidden>Έξοδος</button>
@@ -355,6 +361,7 @@
           ${fld('Ιστοσελίδα', inp('sSite', S.site, 'type="url" maxlength="300" placeholder="https://"'))}
           ${fld('Λογότυπο (link εικόνας)', inp('sLogo', S.logo, 'type="url" maxlength="300" placeholder="https://"'))}
           ${fld('Χρώμα', `<div class="colorrow"><input type="color" id="sAccent" value="${esc(S.accent)}"><span class="hint">Κουμπιά και τονισμοί στη σελίδα κράτησης.</span></div>`)}
+          ${fld('Φόντο σελίδας κράτησης', `<select id="sMode"><option value="light" ${S.mode !== 'dark' ? 'selected' : ''}>Ανοιχτό</option><option value="dark" ${S.mode === 'dark' ? 'selected' : ''}>Σκούρο</option></select>`)}
         </div>
       </section>
 
@@ -464,7 +471,7 @@
   function collect() {
     const v = id => $(id).value.trim();
     S.name = v('sName'); S.phone = v('sPhone'); S.tagline = { el: v('sTagEl'), en: v('sTagEn') };
-    S.ownerEmail = v('sEmail'); S.address = v('sAddr'); S.site = v('sSite'); S.logo = v('sLogo'); S.accent = $('sAccent').value;
+    S.ownerEmail = v('sEmail'); S.address = v('sAddr'); S.site = v('sSite'); S.logo = v('sLogo'); S.accent = $('sAccent').value; S.mode = $('sMode').value;
     S.slotStep = Number($('sStep').value); S.minNoticeHours = Number(v('sNotice')); S.maxDaysAhead = Number(v('sAhead'));
     DAYS.forEach(([d]) => {
       const row = document.querySelector(`.hrow[data-day="${d}"]`);

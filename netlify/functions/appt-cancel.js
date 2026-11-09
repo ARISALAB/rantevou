@@ -28,7 +28,7 @@ exports.handler = async (event) => {
     const past = bk.date < now.date || (bk.date === now.date && bk.s <= now.min);
     const info = {
       service: svc.name, date: bk.date, time: bk.time, end: bk.e, mode: bk.mode, status: bk.status,
-      name: bk.name, past, bizName: biz.name, phone: biz.phone, site: biz.site, modes: biz.modes,
+      name: bk.name, past, bizName: biz.name, phone: biz.phone, site: biz.site, modes: biz.modes, theme: biz.theme || null,
     };
     if (body.action !== 'cancel') return json(200, info);
 

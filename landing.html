@@ -43,7 +43,11 @@
   .top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0}
   .mark{font-weight:650;font-size:1.15rem;letter-spacing:-.02em;color:var(--ink);text-decoration:none;display:inline-flex;align-items:baseline;gap:8px}
   .mark span{background:linear-gradient(transparent 55%,var(--marker) 55%,var(--marker) 92%,transparent 92%);padding:0 2px}
-  .mark small{font-weight:400;font-size:.82rem;color:var(--ink-2)}
+  .mark small{font-weight:400;font-size:.82rem;color:var(--ink-2);display:inline-flex;align-items:center;gap:7px}
+  .akron{width:22px;height:22px;border-radius:6px;background:#0b0b0c;display:inline-grid;place-items:center;flex:none}
+  .akron img{width:14px;height:14px}
+  footer .akron{width:40px;height:40px;border-radius:10px;margin-bottom:12px}
+  footer .akron img{width:26px;height:26px}
   .top nav{display:flex;gap:22px;font-size:.95rem}
   .top nav a{color:var(--ink);text-decoration:none}
   .top nav a:hover{color:var(--pen)}
@@ -197,7 +201,7 @@
 <body>
 
 <header class="wrap top">
-  <a class="mark" href="/"><span>ραντεβού</span><small>από την AR Akron Services</small></a>
+  <a class="mark" href="/"><span>ραντεβού</span><small><i class="akron" aria-hidden="true"><img src="https://www.arakronservices.gr/favicon.svg?v=3" alt=""></i>από την AR Akron Services</small></a>
   <nav aria-label="Κύρια">
     <a href="#pos">Πώς ξεκινάμε</a>
     <a href="#timi">Τιμή</a>
@@ -338,6 +342,7 @@
 <footer>
   <div class="wrap">
     <div>
+      <span class="akron" aria-hidden="true"><img src="https://www.arakronservices.gr/favicon.svg?v=3" alt=""></span>
       <p>Το σύστημα ραντεβού είναι υπηρεσία της <a href="https://www.arakronservices.gr/" target="_blank" rel="noopener">AR Akron Services</a>.</p>
       <p>Αριστείδης Αλαμπουρινός, Γρίβα Διγενή 2, 17342 Άγιος Δημήτριος, Αττική. ΓΕΜΗ 161479309000.</p>
     </div>

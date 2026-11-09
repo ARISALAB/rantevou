@@ -10,24 +10,25 @@
 <title>Ακύρωση ραντεβού</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600&family=Noto+Serif+Display:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geologica:wght@300..700&display=swap">
 <style>
-  :root{--bg:#0b0b0c;--panel:#141416;--line:#2a2a2e;--text:#f3efe6;--muted:#a39e93;--gold:#c9a24a;--gold-2:#e2c27a;--err:#e07a6a;--ok:#6fbf8e}
+  :root{--bg:#F4F5F7;--panel:#FFFFFF;--line:#DDE2E9;--text:#161B33;--muted:#5B627A;--gold:#2A3DD1;--ink:#fff;--err:#C93A3A;--ok:#1F8A55;--soft:#F1F3F6}
+  :root[data-mode="dark"]{--bg:#0E0F12;--panel:#17181C;--line:#2C2E35;--text:#F2F1ED;--muted:#A6A5A3;--soft:#1D1E23;--err:#EE8475;--ok:#6FCB95}
   *{box-sizing:border-box}[hidden]{display:none!important}
-  body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.55 "Commissioner",system-ui,sans-serif;min-height:100vh;display:grid;place-items:center;padding:24px 16px}
-  .card{width:100%;max-width:460px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px 24px}
-  .biz{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0 0 10px}
-  h1{font-family:"Noto Serif Display",Georgia,serif;font-weight:400;font-size:1.7rem;line-height:1.2;margin:0 0 16px}
+  body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.55 "Geologica",system-ui,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+  .card{width:100%;max-width:460px;background:var(--panel);border:1.5px solid var(--line);border-radius:18px;padding:28px 24px}
+  .biz{font-size:.95rem;font-weight:600;color:var(--text);margin:0 0 10px}
+  h1{font-weight:640;letter-spacing:-.03em;font-size:1.7rem;line-height:1.15;margin:0 0 16px}
   .rows{display:grid;gap:8px;margin:0 0 22px;font-size:.96rem}
   .rows div{display:flex;gap:12px}.rows span{color:var(--muted);min-width:84px}
   p{color:var(--muted);margin:0 0 18px}
-  .btn{display:inline-flex;justify-content:center;align-items:center;width:100%;border-radius:10px;padding:13px 18px;font-family:inherit;font-weight:600;font-size:1rem;cursor:pointer;border:1px solid transparent;text-decoration:none;margin-top:8px}
-  .danger{background:#3a1f1b;border-color:#6b3329;color:#ffd9d2}.danger:hover{background:#4a2620}
+  .btn{display:inline-flex;justify-content:center;align-items:center;width:100%;border-radius:999px;padding:14px 18px;font-family:inherit;font-weight:550;font-size:1rem;cursor:pointer;border:1px solid transparent;text-decoration:none;margin-top:8px}
+  .danger{background:var(--err);color:#fff}.danger:hover{filter:brightness(1.08)}
   .ghost{background:none;border-color:var(--line);color:var(--text)}
-  .gold{background:var(--gold);color:#111}
+  .gold{background:var(--gold);color:var(--ink)}
   .btn:disabled{opacity:.6;cursor:wait}
-  .msg{padding:12px 14px;border-radius:10px;background:#1b1b1e;margin:0 0 16px;color:var(--text)}
-  .lang{float:right;background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:4px 9px;cursor:pointer;font:inherit;font-size:.82rem}
+  .msg{padding:12px 14px;border-radius:12px;background:var(--soft);margin:0 0 16px;color:var(--text)}
+  .lang{float:right;background:none;border:1.5px solid var(--line);color:var(--muted);border-radius:999px;padding:5px 11px;cursor:pointer;font:inherit;font-size:.82rem}
 </style>
 </head>
 <body>
@@ -74,6 +75,14 @@
     if (errKey) { $('h').textContent = t('title'); $('body').innerHTML = `<p>${t(errKey)}</p>`; return; }
     if (!info) return;
     $('biz').textContent = info.bizName;
+    if (info.theme) {
+      if (info.theme.mode === 'dark') document.documentElement.dataset.mode = 'dark';
+      if (/^#[0-9a-f]{6}$/i.test(info.theme.accent || '')) {
+        const h = info.theme.accent, l = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)).reduce((a, v, i) => a + v * [.299, .587, .114][i], 0);
+        document.documentElement.style.setProperty('--gold', h);
+        document.documentElement.style.setProperty('--ink', l > 160 ? '#111' : '#fff');
+      }
+    }
     const rows = `<div class="rows">
       <div><span>${t('svc')}</span><b>${esc(info.service[lang])}</b></div>
       <div><span>${t('when')}</span><b>${esc(new Date(info.date + 'T12:00:00').toLocaleDateString(t('locale'), { weekday: 'long', day: 'numeric', month: 'long' }))}, ${esc(info.time)}–${hm(info.end)}</b></div>

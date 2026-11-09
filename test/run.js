@@ -179,6 +179,11 @@ const t = async (label, f) => { await f(); ok++; console.log('✓', label); };
     const neu = sv.find(x => x.name.el === 'Κούρεμα');
     assert(/^s[0-9a-f]{8}$/.test(neu.id)); assert.equal(neu.name.en, 'Κούρεμα'); assert.equal(neu.price.en, '15 €');
     assert(sv.find(x => x.id === 'demo').hasExtra, 'το extra του demo κρατιέται από το .json');
+    assert.equal(save.body.settings.mode, 'dark', 'το AR Akron κρατάει το σκούρο θέμα');
+    const lightSave = await call('appt-admin', { ...K, action: 'saveSettings', settings: { ...save.body.settings, mode: 'light' } });
+    assert.equal(lightSave.body.settings.mode, 'light');
+    const cfgL = JSON.parse((await fn('appt-config')({ httpMethod: 'GET', queryStringParameters: { b: 'arakron' } })).body);
+    assert.equal(cfgL.theme.mode, 'light'); assert.equal(cfgL.theme.accent, '#c9a24a');
 
     const r = await fn('appt-config')({ httpMethod: 'GET', queryStringParameters: { b: 'arakron' } });
     const c = JSON.parse(r.body);

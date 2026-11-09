@@ -67,11 +67,12 @@ function ics(biz, svc, b, lang, cancelled) {
 }
 
 function shell(biz, inner) {
-  const gold = (biz.theme && biz.theme.accent) || '#c9a24a';
+  const gold = (biz.theme && biz.theme.accent) || '#2a3dd1';
+  const dark = !!(biz.theme && biz.theme.mode === 'dark');
   return `<!doctype html><html><body style="margin:0;background:#f4f2ee;font-family:Arial,Helvetica,sans-serif;color:#1b1b1b">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f2ee;padding:24px 12px"><tr><td align="center">
 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden">
-<tr><td style="background:#0b0b0c;padding:22px 28px;color:#fff;font-size:18px;font-weight:bold;border-bottom:3px solid ${gold}">${esc(biz.name)}</td></tr>
+<tr><td style="background:${dark ? '#0b0b0c' : '#ffffff'};padding:22px 28px;color:${dark ? '#ffffff' : '#161b33'};font-size:18px;font-weight:bold;border-bottom:3px solid ${gold}">${esc(biz.name)}</td></tr>
 <tr><td style="padding:28px">${inner}</td></tr>
 <tr><td style="padding:16px 28px;background:#faf8f4;color:#777;font-size:12px">${esc(biz.name)} · ${esc(biz.phone || '')} · <a href="${esc(biz.site || '')}" style="color:#777">${esc((biz.site || '').replace(/^https?:\/\//, '').replace(/\/$/, ''))}</a></td></tr>
 </table></td></tr></table></body></html>`;
@@ -158,7 +159,7 @@ ${detailsTable(biz, svc, b, 'el', true)}${contact}
 
 // Νέο αίτημα από τη landing page («Θέλω το σύστημα») προς τον διαχειριστή της πλατφόρμας
 async function leadToPlatform(to, lead) {
-  const platform = { name: 'Ραντεβού · AR Akron Services', phone: '', site: siteUrl(), theme: { accent: '#c9a24a' } };
+  const platform = { name: 'Ραντεβού · AR Akron Services', phone: '', site: siteUrl(), theme: { accent: '#2a3dd1' } };
   const row = (k, v) => v ? `<tr><td style="padding:6px 12px 6px 0;color:#777;vertical-align:top;white-space:nowrap">${k}</td><td style="padding:6px 0;font-weight:bold">${esc(v)}</td></tr>` : '';
   const inner = `<p style="margin:0 0 4px;font-size:18px;font-weight:bold">Νέο αίτημα για το σύστημα ραντεβού</p>
 <table cellpadding="0" cellspacing="0" style="margin:18px 0;font-size:15px">
