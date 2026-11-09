@@ -23,7 +23,7 @@ exports.handler = async (event) => {
 
   const date = String(b.date || ''), time = String(b.time || ''), mode = String(b.mode || '');
   const name = str(b.name, 100), phone = str(b.phone, 30), email = str(b.email, 120).toLowerCase();
-  const company = str(b.company, 120), address = str(b.address, 200), notes = str(b.notes, 1500);
+  const company = biz.askCompany ? str(b.company, 120) : '', address = str(b.address, 200), notes = str(b.notes, 1500);
   const extra = str(b.extra, 60);
   const lang = b.lang === 'en' ? 'en' : 'el';
   // Πηγή κράτησης: "google" από το κουμπί του Google, αλλιώς το utm_source (π.χ. "instagram")

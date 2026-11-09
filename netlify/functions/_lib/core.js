@@ -17,6 +17,7 @@ function publicConfig(biz) {
       staff: (biz.staff || []).filter(p => p.active !== false && (!Array.isArray(p.services) || p.services.includes(s.id))).map(p => p.id),
     })),
     staff: (biz.staff || []).filter(p => p.active !== false).map(p => ({ id: p.id, name: p.name })),
+    askCompany: !!biz.askCompany,
   };
 }
 

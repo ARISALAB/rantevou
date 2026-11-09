@@ -98,6 +98,7 @@
 
   form{display:grid;gap:16px}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .row2.solo{grid-template-columns:1fr}
   @media (max-width:560px){.row2{grid-template-columns:1fr}}
   label.f{display:grid;gap:7px;font-size:.9rem;font-weight:500;color:var(--text)}
   input,textarea,select{width:100%;background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;color:var(--text);font:inherit;font-size:16px}
@@ -176,7 +177,7 @@
     <form id="form" novalidate>
       <div class="row2">
         <label class="f"><span><span data-t="name"></span> <span class="req">*</span></span><input name="name" autocomplete="name" required maxlength="100"></label>
-        <label class="f"><span data-t="company"></span><input name="company" autocomplete="organization" maxlength="120"></label>
+        <label class="f" id="companyBox" hidden><span data-t="company"></span><input name="company" autocomplete="organization" maxlength="120"></label>
       </div>
       <div class="row2">
         <label class="f"><span><span data-t="phone"></span> <span class="req">*</span></span><input name="phone" type="tel" autocomplete="tel" required maxlength="30"></label>
@@ -252,7 +253,7 @@
       approval: 'Θα σας επιβεβαιώσουμε τηλεφωνικά', timesFor: d => `Διαθέσιμες ώρες, ${d}`,
       noSlots: 'Δεν υπάρχουν διαθέσιμες ώρες αυτόν τον μήνα. Δοκιμάστε τον επόμενο ή καλέστε μας.',
       pickDay: 'Διαλέξτε μια ημέρα από το ημερολόγιο.',
-      name: 'Ονοματεπώνυμο', company: 'Επιχείρηση', phone: 'Τηλέφωνο', address: 'Διεύθυνση καταστήματος',
+      name: 'Ονοματεπώνυμο', company: 'Επιχείρηση', phone: 'Τηλέφωνο', address: 'Διεύθυνση',
       notes: 'Θέλετε να μας πείτε κάτι από πριν;',
       consent: url => `Συμφωνώ να χρησιμοποιηθούν τα στοιχεία μου για το ραντεβού, σύμφωνα με την <a href="${url}" target="_blank" rel="noopener">πολιτική απορρήτου</a>.`,
       book: 'Κλείσιμο ραντεβού', request: 'Αποστολή αιτήματος', sending: 'Αποστολή…',
@@ -275,7 +276,7 @@
       approval: 'We will confirm by phone', timesFor: d => `Available times, ${d}`,
       noSlots: 'No available times this month. Try the next one or give us a call.',
       pickDay: 'Choose a day from the calendar.',
-      name: 'Full name', company: 'Business', phone: 'Phone', address: 'Venue address',
+      name: 'Full name', company: 'Business', phone: 'Phone', address: 'Address',
       notes: 'Anything you would like to tell us in advance?',
       consent: url => `I agree that my details are used for this appointment, in line with the <a href="${url}" target="_blank" rel="noopener">privacy policy</a>.`,
       book: 'Book appointment', request: 'Send request', sending: 'Sending…',
@@ -461,9 +462,10 @@
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email'))) return err(t('errEmail'));
     if (v('phone').replace(/\D/g, '').length < 8) return err(t('errPhone'));
     const btn = $('submitBtn'); btn.disabled = true; btn.innerHTML = `<span class="spinner"></span> ${t('sending')}`;
+    const c0 = state.cfg;
     const r = await api('appt-book', {
       b: BIZ, service: s.id, staff: state.staff, date: state.date, time: state.time, mode: state.mode,
-      name: v('name'), company: v('company'), phone: v('phone'), email: v('email'),
+      name: v('name'), company: c0.askCompany ? v('company') : '', phone: v('phone'), email: v('email'),
       address: v('address'), extra: v('extra'), notes: v('notes'), website: v('website'),
       consent: f.consent.checked, lang, source: SRC.source, rwg: SRC.rwg,
     });
@@ -527,6 +529,9 @@
     if (!r.ok) { $('lead').textContent = t('loadErr'); return; }
     const c = state.cfg = r.data;
     applyTheme(c.theme || {});
+    // Το πεδίο «Επιχείρηση» μόνο όπου το ζητάει η επιχείρηση (π.χ. B2B), αλλιώς το «Ονοματεπώνυμο» πιάνει όλη τη γραμμή
+    $('companyBox').hidden = !c.askCompany;
+    $('companyBox').parentElement.classList.toggle('solo', !c.askCompany);
     $('bizName').textContent = c.name;
     $('logo').onerror = () => { $('logo').hidden = true; };
     if (c.icons) {   // το εικονίδιο της επιχείρησης στην καρτέλα και στην αρχική οθόνη του κινητού

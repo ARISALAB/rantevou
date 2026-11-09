@@ -32,7 +32,7 @@ function merge(base, s) {
   if (!s || typeof s !== 'object') return base;
   const baseSvc = id => (base.services || []).find(x => x.id === id) || {};
   const out = { ...base };
-  ['name', 'phone', 'ownerEmail', 'address', 'site', 'logo', 'hours', 'slotStep', 'minNoticeHours', 'maxDaysAhead', 'remindHours']
+  ['name', 'phone', 'ownerEmail', 'address', 'site', 'logo', 'hours', 'slotStep', 'minNoticeHours', 'maxDaysAhead', 'remindHours', 'askCompany']
     .forEach(k => { if (s[k] !== undefined) out[k] = s[k]; });
   if (s.tagline) out.tagline = { ...(base.tagline || {}), ...s.tagline };
   if (s.accent || s.mode) out.theme = { ...(base.theme || {}), ...(s.accent ? { accent: s.accent } : {}), ...(s.mode ? { mode: s.mode } : {}) };
@@ -85,6 +85,7 @@ function editable(biz) {
     hours: biz.hours, slotStep: biz.slotStep || 30,
     minNoticeHours: biz.minNoticeHours || 0, maxDaysAhead: biz.maxDaysAhead || 60,
     remindHours: remindHoursOf(biz),
+    askCompany: !!biz.askCompany,
     modes: Object.fromEntries(Object.entries(biz.modes || {}).map(([k, v]) => [k, v.el])),
     staff: (biz.staff || []).map(p => ({
       id: p.id, name: p.name, active: p.active !== false,
@@ -152,6 +153,7 @@ function sanitize(input, base) {
   if (out.logo && !URL_RE.test(out.logo)) fail('logo');
   out.accent = /^#[0-9a-fA-F]{6}$/.test(i.accent) ? i.accent.toLowerCase() : fail('accent');
   out.mode = i.mode === 'dark' ? 'dark' : 'light';
+  out.askCompany = !!i.askCompany;
 
   out.hours = cleanHours(i.hours, 'hours');
 

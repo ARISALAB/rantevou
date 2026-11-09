@@ -380,6 +380,8 @@
           ${fld('Ιστοσελίδα', inp('sSite', S.site, 'type="url" maxlength="300" placeholder="https://"'))}
           ${fld('Λογότυπο (link εικόνας)', inp('sLogo', S.logo, 'type="url" maxlength="300" placeholder="https://"'))}
           ${fld('Χρώμα', `<div class="colorrow"><input type="color" id="sAccent" value="${esc(S.accent)}"><span class="hint">Κουμπιά και τονισμοί στη σελίδα κράτησης.</span></div>`)}
+          <div class="fld full"><label class="sw"><input type="checkbox" id="sCompany" ${S.askCompany ? 'checked' : ''}>Ζητάμε από τον πελάτη και το όνομα της επιχείρησής του</label>
+            <small class="hint">Για επαγγελματίες που εξυπηρετούν επιχειρήσεις (π.χ. λογιστές, σύμβουλοι). Αλλιώς ο πελάτης δίνει μόνο όνομα, τηλέφωνο και email.</small></div>
           ${fld('Φόντο σελίδας κράτησης', `<select id="sMode"><option value="light" ${S.mode !== 'dark' ? 'selected' : ''}>Ανοιχτό</option><option value="dark" ${S.mode === 'dark' ? 'selected' : ''}>Σκούρο</option></select>`)}
         </div>
       </section>
@@ -530,7 +532,7 @@
   function collect() {
     const v = id => $(id).value.trim();
     S.name = v('sName'); S.phone = v('sPhone'); S.tagline = { el: v('sTagEl'), en: v('sTagEn') };
-    S.ownerEmail = v('sEmail'); S.address = v('sAddr'); S.site = v('sSite'); S.logo = v('sLogo'); S.accent = $('sAccent').value; S.mode = $('sMode').value;
+    S.ownerEmail = v('sEmail'); S.address = v('sAddr'); S.site = v('sSite'); S.logo = v('sLogo'); S.accent = $('sAccent').value; S.mode = $('sMode').value; S.askCompany = $('sCompany').checked;
     S.slotStep = Number($('sStep').value); S.minNoticeHours = Number(v('sNotice')); S.maxDaysAhead = Number(v('sAhead')); S.remindHours = Number($('sRemind').value);
     $('staffList').querySelectorAll('details').forEach(det => {
       const p = S.staff[det.dataset.i], g = key => det.querySelector(`[data-sk="${key}"]`);

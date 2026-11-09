@@ -324,13 +324,14 @@ const t = async (label, f) => { await f(); ok++; console.log('✓', label); };
     // Δουλεύει όπως κάθε επιχείρηση
     const cfg = await fn('appt-config')({ httpMethod: 'GET', queryStringParameters: { b: 'kommotirio-maria' } });
     const cj = JSON.parse(cfg.body);
-    assert.equal(cfg.statusCode, 200); assert.equal(cj.name, 'Κομμωτήριο Μαρία'); assert.equal(cj.theme.mode, 'light');
+    assert.equal(cfg.statusCode, 200); assert.equal(cj.name, 'Κομμωτήριο Μαρία'); assert.equal(cj.theme.mode, 'light'); assert.equal(cj.askCompany, false, 'χωρίς πεδίο Επιχείρηση');
     assert(!('_keyHash' in cj) && !JSON.stringify(cj).includes('keyHash'));
     const av = await call('appt-availability', { b: 'kommotirio-maria', service: 'rantevou' });
     assert.equal(av.body.days['2026-10-06'][0], '09:00');
     global.__APPT_SENT__ = [];
-    const bk = await call('appt-book', { ...base, b: 'kommotirio-maria', service: 'rantevou', date: '2026-10-06', time: '09:00', mode: 'inshop' }, ip(60));
+    const bk = await call('appt-book', { ...base, company: 'ΙΚΕ', b: 'kommotirio-maria', service: 'rantevou', date: '2026-10-06', time: '09:00', mode: 'inshop' }, ip(60));
     assert.equal(bk.code, 200, JSON.stringify(bk.body));
+    assert.equal(global.__APPT_TEST_DB__.data.appt.bookings['kommotirio-maria'][bk.body.id].company, '', 'δεν κρατιέται όταν δεν ζητείται');
     assert.equal(global.__APPT_SENT__[1].to, 'maria@example.com');
     assert(global.__APPT_SENT__[1].from.startsWith('"Κομμωτήριο Μαρία"'));
 
