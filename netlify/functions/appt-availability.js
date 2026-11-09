@@ -1,6 +1,7 @@
-// POST { b, service } -> { today, days: { "2026-10-06": ["09:00","09:30",...], ... } }
+// POST { b, service, staff? } -> { today, days: { "2026-10-06": ["09:00","09:30",...], ... } }
+// staff: id ατόμου ή κενό για «οποιονδήποτε»
 // Υπολογίζει τις ελεύθερες ώρες για όλο το διάστημα κρατήσεων (π.χ. 60 μέρες) με μία ανάγνωση.
-const { nowLocal, addDays, slotsForDay } = require('./_lib/core');
+const { nowLocal, addDays, eligibleStaff, slotsForStaff } = require('./_lib/core');
 const { loadBusiness, activeServices } = require('./_lib/settings');
 const { json, preflight, parseBody } = require('./_lib/respond');
 const { getDb } = require('./_lib/firebase');
@@ -15,6 +16,8 @@ exports.handler = async (event) => {
   if (!biz) return json(404, { error: 'not_found' });
   const svc = activeServices(biz).find(s => s.id === body.service);
   if (!svc) return json(400, { error: 'bad_service' });
+  const people = eligibleStaff(biz, svc, String(body.staff || ''));
+  if (!people.length) return json(400, { error: 'bad_staff' });
 
   try {
     const now = nowLocal(biz.timezone);
@@ -23,7 +26,7 @@ exports.handler = async (event) => {
     const byDay = snap.val() || {};
     const days = {};
     for (let d = now.date; d <= last; d = addDays(d, 1)) {
-      const slots = slotsForDay(biz, svc, d, byDay[d], now);
+      const slots = slotsForStaff(biz, svc, d, byDay[d], now, people);
       if (slots.length) days[d] = slots;
     }
     return json(200, { today: now.date, days });

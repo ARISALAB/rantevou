@@ -1,7 +1,7 @@
-// POST { b, service, date, time, mode, name, phone, email, company, address, extra, notes, lang, consent, website }
+// POST { b, service, staff?, date, time, mode, name, phone, email, company, address, extra, notes, lang, consent, website }
 //  -> 200 { ok, id, status: "confirmed" | "pending" }
 //  -> 4xx { error: "bad_request" | "bad_time" | "slot_taken" | "rate_limited" | "not_found" }
-const { nowLocal, slotsForDay, toMin, interval, str } = require('./_lib/core');
+const { nowLocal, toMin, interval, str, eligibleStaff, staffSlots } = require('./_lib/core');
 const { loadBusiness, activeServices } = require('./_lib/settings');
 const { json, preflight, parseBody } = require('./_lib/respond');
 const { getDb } = require('./_lib/firebase');
@@ -36,9 +36,12 @@ exports.handler = async (event) => {
     return json(400, { error: 'bad_request' });
   }
 
-  // Η ώρα πρέπει να είναι μέσα στο ωράριο, με την ελάχιστη προειδοποίηση κ.λπ.
+  // Άτομο: συγκεκριμένο ή «οποιοσδήποτε». Η ώρα πρέπει να είναι μέσα στο ωράριό του, με την ελάχιστη προειδοποίηση κ.λπ.
+  const people = eligibleStaff(biz, svc, String(b.staff || ''));
+  if (!people.length) return json(400, { error: 'bad_request' });
   const now = nowLocal(biz.timezone);
-  if (!slotsForDay(biz, svc, date, {}, now).includes(time)) return json(400, { error: 'bad_time' });
+  const fits = people.filter(p => staffSlots(biz, svc, date, {}, now, p).includes(time));
+  if (!fits.length) return json(400, { error: 'bad_time' });
 
   try {
     const db = getDb();
@@ -46,13 +49,24 @@ exports.handler = async (event) => {
 
     const id = newId();
     const span = interval(svc, toMin(time));
-    if (!(await reserve(db, biz.id, date, id, { ...span, k: 'b' }))) return json(409, { error: 'slot_taken' });
+    // «Οποιοσδήποτε»: πρώτα όποιος έχει τα λιγότερα ραντεβού εκείνη τη μέρα
+    let order = fits;
+    if (fits.length > 1) {
+      const day = (await db.ref(`appt/days/${biz.id}/${date}`).get()).val() || {};
+      const load = p => Object.values(day).filter(x => x && x.k === 'b' && x.st === p.id).length;
+      order = fits.slice().sort((a, c) => load(a) - load(c));
+    }
+    let person = null;
+    for (const p of order) {
+      if (await reserve(db, biz.id, date, id, { ...span, k: 'b', ...(p.id ? { st: p.id } : {}) })) { person = p; break; }
+    }
+    if (!person) return json(409, { error: 'slot_taken' });
 
     const booking = {
       service: svc.id, date, time, s: span.s, e: span.e, mode,
       name, phone, email, company, address: mode === 'onsite' ? address : '', extra: svc.extra ? extra : '', notes,
       lang, status: svc.approval ? 'pending' : 'confirmed', token: newToken(), created: Date.now(), consent: true,
-      source, ...(rwg ? { rwg } : {}),
+      source, ...(rwg ? { rwg } : {}), ...(person.id ? { staff: person.id, staffName: person.name } : {}),
     };
     try {
       await bookingRef(db, biz.id, id).set(booking);
@@ -68,7 +82,7 @@ exports.handler = async (event) => {
     ]);
     sent.forEach(r => r.status === 'rejected' && console.error('[appt-book] email', r.reason));
 
-    return json(200, { ok: true, id, status: booking.status });
+    return json(200, { ok: true, id, status: booking.status, staffName: person.name || '' });
   } catch (err) {
     console.error('[appt-book]', err);
     return json(500, { error: 'server_error' });

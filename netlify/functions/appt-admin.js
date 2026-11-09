@@ -1,7 +1,7 @@
 // Διαχείριση ραντεβού. Κλειδί πρόσβασης: μεταβλητή περιβάλλοντος ADMIN_KEY_<ID> (π.χ. ADMIN_KEY_ARAKRON).
 // POST { b, key, action: "list" }
 // POST { b, key, action: "confirm" | "cancel", id }
-// POST { b, key, action: "block", date, from?, to?, note? }   (χωρίς from/to = όλη η μέρα)
+// POST { b, key, action: "block", date, from?, to?, note?, staff? }   (χωρίς from/to = όλη η μέρα, χωρίς staff = όλοι)
 // POST { b, key, action: "unblock", date, id }
 // POST { b, key, action: "settings" }              -> τρέχουσες ρυθμίσεις για την καρτέλα «Ρυθμίσεις»
 // POST { b, key, action: "saveSettings", settings } -> αποθήκευση (400 { error: "invalid", field } αν κάτι δεν στέκει)
@@ -48,10 +48,11 @@ exports.handler = async (event) => {
         const days = (await db.ref(`appt/days/${biz.id}`).orderByKey().startAt(now.date).get()).val() || {};
         const blocks = [];
         Object.entries(days).forEach(([date, entries]) => Object.entries(entries || {}).forEach(([id, x]) => {
-          if (x && x.k === 'x') blocks.push({ id, date, from: fromMin(x.s), to: fromMin(Math.min(x.e, 1439)), allDay: x.s === 0 && x.e >= 1440, note: x.note || '' });
+          if (x && x.k === 'x') blocks.push({ id, date, from: fromMin(x.s), to: fromMin(Math.min(x.e, 1439)), allDay: x.s === 0 && x.e >= 1440, note: x.note || '', staff: x.st || '' });
         }));
         blocks.sort((a, b) => (a.date + a.from).localeCompare(b.date + b.from));
-        return json(200, { name: biz.name, today: now.date, bookings, blocks, services: biz.services.map(s => ({ id: s.id, name: s.name.el })), modes: biz.modes });
+        return json(200, { name: biz.name, today: now.date, bookings, blocks, services: biz.services.map(s => ({ id: s.id, name: s.name.el })), modes: biz.modes,
+          staff: (biz.staff || []).map(p => ({ id: p.id, name: p.name, active: p.active !== false })) });
       }
 
       case 'confirm':
@@ -85,8 +86,10 @@ exports.handler = async (event) => {
           s = toMin(body.from); e = toMin(body.to);
           if (!(e > s)) return json(400, { error: 'bad_request' });
         }
+        const st = String(body.staff || '');
+        if (st && !(biz.staff || []).some(p => p.id === st)) return json(400, { error: 'bad_request' });
         const id = 'x' + newId();
-        await dayRef(db, biz.id, date).child(id).set({ s, e, ps: s, pe: e, k: 'x', note: str(body.note, 120) });
+        await dayRef(db, biz.id, date).child(id).set({ s, e, ps: s, pe: e, k: 'x', note: str(body.note, 120), ...(st ? { st } : {}) });
         return json(200, { ok: true, id });
       }
 

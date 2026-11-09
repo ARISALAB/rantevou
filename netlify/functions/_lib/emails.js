@@ -5,7 +5,7 @@ const { siteUrl } = require('./respond');
 
 const T = {
   el: {
-    when: 'Πότε', how: 'Πώς', where: 'Πού', service: 'Υπηρεσία', notes: 'Σημειώσεις',
+    when: 'Πότε', how: 'Πώς', where: 'Πού', service: 'Υπηρεσία', notes: 'Σημειώσεις', with: 'Με',
     hello: n => `Γεια σας ${n},`,
     confirmed: 'Το ραντεβού σας κλείστηκε.',
     pending: 'Λάβαμε το αίτημά σας. Θα επικοινωνήσουμε μαζί σας σύντομα για να το επιβεβαιώσουμε.',
@@ -20,7 +20,7 @@ const T = {
     months: ['Ιανουαρίου', 'Φεβρουαρίου', 'Μαρτίου', 'Απριλίου', 'Μαΐου', 'Ιουνίου', 'Ιουλίου', 'Αυγούστου', 'Σεπτεμβρίου', 'Οκτωβρίου', 'Νοεμβρίου', 'Δεκεμβρίου'],
   },
   en: {
-    when: 'When', how: 'How', where: 'Where', service: 'Service', notes: 'Notes',
+    when: 'When', how: 'How', where: 'Where', service: 'Service', notes: 'Notes', with: 'With',
     hello: n => `Hello ${n},`,
     confirmed: 'Your appointment is booked.',
     pending: 'We received your request. We will contact you shortly to confirm it.',
@@ -83,6 +83,7 @@ function detailsTable(biz, svc, b, lang, forOwner) {
   const row = (k, v) => v ? `<tr><td style="padding:6px 12px 6px 0;color:#777;vertical-align:top;white-space:nowrap">${k}</td><td style="padding:6px 0;font-weight:bold">${v}</td></tr>` : '';
   return `<table cellpadding="0" cellspacing="0" style="margin:18px 0;font-size:15px">
 ${row(t.service, esc(svc.name[lang]))}
+${b.staffName ? row(t.with, esc(b.staffName)) : ''}
 ${row(t.when, `${niceDate(b.date, lang)}, ${fromMin(b.s)}–${fromMin(b.e)}`)}
 ${row(t.how, forOwner && b.mode === 'onsite' ? 'Στο κατάστημα του πελάτη' : esc(biz.modes[b.mode][lang]))}
 ${b.mode === 'onsite' ? row(t.where, esc(b.address)) : ''}
@@ -148,7 +149,7 @@ ${detailsTable(biz, svc, b, 'el', true)}${contact}
 <p style="margin-top:22px">${btn(`${siteUrl()}/admin.html?b=${biz.id}`, 'Άνοιγμα διαχείρισης', gold)}</p>`;
   const msg = {
     from: from(biz), to: ownerTo(biz), reply_to: b.email,
-    subject: `${kind === 'new' ? '🗓️ ' : '❌ '}${head}: ${svc.name.el} · ${niceDate(b.date, 'el')} ${fromMin(b.s)} · ${b.name}`,
+    subject: `${kind === 'new' ? '🗓️ ' : '❌ '}${head}: ${svc.name.el}${b.staffName ? ' με ' + b.staffName : ''} · ${niceDate(b.date, 'el')} ${fromMin(b.s)} · ${b.name}`,
     html: shell(biz, inner),
   };
   if (kind === 'new' && b.status === 'confirmed') {

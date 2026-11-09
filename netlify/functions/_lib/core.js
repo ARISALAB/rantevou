@@ -14,7 +14,9 @@ function publicConfig(biz) {
     services: services.filter(s => s.active !== false).map(s => ({
       id: s.id, name: s.name, desc: s.desc, price: s.price, duration: s.duration,
       modes: s.modes, approval: !!s.approval, extra: s.extra || null,
+      staff: (biz.staff || []).filter(p => p.active !== false && (!Array.isArray(p.services) || p.services.includes(s.id))).map(p => p.id),
     })),
+    staff: (biz.staff || []).filter(p => p.active !== false).map(p => ({ id: p.id, name: p.name })),
   };
 }
 
@@ -73,10 +75,39 @@ function slotsForDay(biz, service, dateStr, dayEntries, now) {
   return out;
 }
 
+// ---------- Προσωπικό (πολλά ημερολόγια) ----------
+// Χωρίς προσωπικό στις ρυθμίσεις, η επιχείρηση έχει ένα «σιωπηλό» ημερολόγιο με id ''.
+// Στη βάση κάθε διάστημα μιας ημέρας μπορεί να έχει st (το άτομο). Διάστημα χωρίς st (μπλοκάρισμα
+// για όλους ή παλιό ραντεβού) πιάνει όλα τα ημερολόγια.
+function staffList(biz) {
+  const list = (biz.staff || []).filter(p => p && p.active !== false);
+  return list.length ? list : [{ id: '', name: '', hours: null, services: null }];
+}
+const doesService = (p, svcId) => !Array.isArray(p.services) || p.services.includes(svcId);
+// Ποια άτομα κάνουν την υπηρεσία (και, αν ζητήθηκε, μόνο το συγκεκριμένο)
+function eligibleStaff(biz, svc, wanted) {
+  const all = staffList(biz).filter(p => doesService(p, svc.id));
+  if (!wanted) return all;
+  return all.filter(p => p.id === wanted);
+}
+const entriesFor = (dayEntries, staffId) =>
+  Object.fromEntries(Object.entries(dayEntries || {}).filter(([, x]) => x && (!staffId || !x.st || x.st === staffId)));
+function staffSlots(biz, svc, dateStr, dayEntries, now, person) {
+  const b = person.hours ? { ...biz, hours: person.hours } : biz;
+  return slotsForDay(b, svc, dateStr, entriesFor(dayEntries, person.id), now);
+}
+// Ελεύθερες ώρες για ένα άτομο ή για «οποιονδήποτε» (ένωση)
+function slotsForStaff(biz, svc, dateStr, dayEntries, now, people) {
+  const set = new Set();
+  people.forEach(p => staffSlots(biz, svc, dateStr, dayEntries, now, p).forEach(t => set.add(t)));
+  return [...set].sort();
+}
+
 const str = (v, max) => (typeof v === 'string' ? v.trim() : '').slice(0, max);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 module.exports = {
   DAYS, publicConfig, toMin, fromMin, nowLocal, addDays, dayKey, daysBetween,
   interval, conflicts, slotsForDay, str, esc,
+  staffList, eligibleStaff, entriesFor, staffSlots, slotsForStaff,
 };

@@ -254,5 +254,54 @@ const t = async (label, f) => { await f(); ok++; console.log('✓', label); };
     assert.deepEqual(codes, [200, 200, 429]);
   });
 
+  await t('προσωπικό: ωράριο και υπηρεσίες ανά άτομο, «οποιοσδήποτε», μπλοκάρισμα ανά άτομο', async () => {
+    const K = { b: 'arakron', key: 'test-admin-key-123456' };
+    const st = (await call('appt-admin', { ...K, action: 'settings' })).body.settings;
+    const weekdays = { mon: [['09:00', '13:00']], tue: [['09:00', '13:00']], wed: [['09:00', '13:00']], thu: [['09:00', '13:00']], fri: [['09:00', '13:00']], sat: [], sun: [] };
+    const staff = [
+      { id: 'maria', name: 'Μαρία', active: true, ownHours: true, hours: weekdays, allServices: true },
+      { name: 'Γιώργος', active: true, ownHours: false, allServices: false, services: ['intro'] },
+    ];
+    const bad = await call('appt-admin', { ...K, action: 'saveSettings', settings: { ...st, staff: [staff[1]] } });
+    assert.equal(bad.body.field, 'staffCoverage', 'αυτοψία χωρίς άτομο');
+    const sv = await call('appt-admin', { ...K, action: 'saveSettings', settings: { ...st, staff } });
+    assert.equal(sv.code, 200, JSON.stringify(sv.body));
+    const giorgos = sv.body.settings.staff.find(p => p.name === 'Γιώργος');
+    assert(/^p[0-9a-f]{8}$/.test(giorgos.id)); assert.equal(giorgos.ownHours, false);
+
+    const cfg = JSON.parse((await fn('appt-config')({ httpMethod: 'GET', queryStringParameters: { b: 'arakron' } })).body);
+    assert.equal(cfg.staff.length, 2);
+    assert.deepEqual(cfg.services.find(x => x.id === 'intro').staff.sort(), ['maria', giorgos.id].sort());
+    assert.deepEqual(cfg.services.find(x => x.id === 'visit').staff, ['maria']);
+
+    const av = async (service, staffId) => (await call('appt-availability', { b: 'arakron', service, staff: staffId })).body.days || {};
+    assert.equal((await av('intro', 'maria'))['2026-10-20'].slice(-1)[0], '12:30', 'Μαρία έως 13:00');
+    assert.equal((await av('intro', ''))['2026-10-20'].slice(-1)[0], '16:30', 'οποιοσδήποτε: ο Γιώργος έως 17:00');
+    assert.equal((await call('appt-availability', { b: 'arakron', service: 'visit', staff: giorgos.id })).code, 400);
+
+    global.__APPT_SENT__ = [];
+    const b1 = await call('appt-book', { ...base, service: 'intro', staff: '', date: '2026-10-20', time: '10:00', mode: 'phone' }, ip(50));
+    const b2 = await call('appt-book', { ...base, service: 'intro', staff: '', date: '2026-10-20', time: '10:00', mode: 'phone' }, ip(51));
+    const b3 = await call('appt-book', { ...base, service: 'intro', staff: '', date: '2026-10-20', time: '10:00', mode: 'phone' }, ip(52));
+    assert.equal(b1.code, 200); assert.equal(b2.code, 200); assert.equal(b3.code, 409, 'και οι δύο πιασμένοι');
+    assert.notEqual(b1.body.staffName, b2.body.staffName, 'μοιράζονται σε διαφορετικά άτομα');
+    assert(global.__APPT_SENT__.some(m => m.html.includes('Με</td>')), 'το άτομο στο email');
+    assert.equal((await call('appt-book', { ...base, service: 'visit', staff: giorgos.id, date: '2026-10-21', time: '09:00', mode: 'onsite', address: 'x' }, ip(53))).code, 400);
+    const bm = await call('appt-book', { ...base, service: 'intro', staff: 'maria', date: '2026-10-20', time: '11:00', mode: 'phone' }, ip(54));
+    assert.equal(bm.body.staffName, 'Μαρία');
+    assert(!(await av('intro', 'maria'))['2026-10-20'].includes('11:00'));
+    assert((await av('intro', giorgos.id))['2026-10-20'].includes('11:00'), 'ο Γιώργος είναι ελεύθερος στις 11:00');
+
+    const blk = await call('appt-admin', { ...K, action: 'block', date: '2026-10-21', staff: 'maria', note: 'Άδεια' });
+    assert.equal(blk.code, 200);
+    assert(!(await av('intro', 'maria'))['2026-10-21'], 'Μαρία σε άδεια');
+    assert((await av('intro', ''))['2026-10-21'], 'οποιοσδήποτε: υπάρχει ο Γιώργος');
+    const list = await call('appt-admin', { ...K, action: 'list' });
+    assert.equal(list.body.staff.length, 2);
+    assert(list.body.blocks.some(x => x.staff === 'maria' && x.note === 'Άδεια'));
+    assert.equal(list.body.bookings.find(x => x.id === bm.body.id).staff, 'maria');
+    delete global.__APPT_TEST_DB__.data.appt.settings;
+  });
+
   console.log(`\nΌλες οι δοκιμές πέρασαν (${ok}).`);
 })().catch(e => { console.error('✗', e.message); process.exit(1); });

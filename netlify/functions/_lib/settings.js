@@ -28,7 +28,16 @@ function merge(base, s) {
     out.services = s.services.map(x => ({ ...x, extra: baseSvc(x.id).extra || null }));
   }
   // Οι μέρες χωρίς διαστήματα δεν αποθηκεύονται στη βάση (το Firebase σβήνει τους κενούς πίνακες)
-  out.hours = Object.fromEntries(DAYS.map(d => [d, (out.hours || {})[d] || []]));
+  const fillHours = h => Object.fromEntries(DAYS.map(d => [d, (h || {})[d] || []]));
+  out.hours = fillHours(out.hours);
+  // Προσωπικό: hours null/λείπει = ωράριο της επιχείρησης, services null/λείπει = όλες οι υπηρεσίες
+  if (Array.isArray(s.staff)) {
+    out.staff = s.staff.filter(Boolean).map(p => ({
+      id: p.id, name: p.name, active: p.active !== false,
+      hours: p.ownHours ? fillHours(p.hours) : null,
+      services: p.allServices === false ? (Array.isArray(p.services) ? p.services : []) : null,
+    }));
+  }
   return out;
 }
 
@@ -57,6 +66,11 @@ function editable(biz) {
     hours: biz.hours, slotStep: biz.slotStep || 30,
     minNoticeHours: biz.minNoticeHours || 0, maxDaysAhead: biz.maxDaysAhead || 60,
     modes: Object.fromEntries(Object.entries(biz.modes || {}).map(([k, v]) => [k, v.el])),
+    staff: (biz.staff || []).map(p => ({
+      id: p.id, name: p.name, active: p.active !== false,
+      ownHours: !!p.hours, hours: p.hours || biz.hours,
+      allServices: !Array.isArray(p.services), services: Array.isArray(p.services) ? p.services : biz.services.map(x => x.id),
+    })),
     services: biz.services.map(s => ({
       id: s.id, active: s.active !== false,
       name: { el: s.name.el || '', en: s.name.en || '' },
@@ -78,6 +92,28 @@ const URL_RE = /^https:\/\/[^\s"'<>]+$/;
 
 function fail(msg) { const e = new Error(msg); e.field = msg; throw e; }
 
+// Ωράριο: έως 3 διαστήματα τη μέρα, σε σειρά, χωρίς επικάλυψη, τουλάχιστον μία ανοιχτή μέρα
+function cleanHours(h, field) {
+  h = h || {};
+  const out = {};
+  let open = 0;
+  for (const d of DAYS) {
+    const ranges = Array.isArray(h[d]) ? h[d] : [];
+    if (ranges.length > 3) fail(field);
+    let prevEnd = -1;
+    out[d] = ranges.map(r => {
+      if (!Array.isArray(r) || !TIME.test(r[0]) || !TIME.test(r[1])) fail(field);
+      const a = tmin(r[0]), b = tmin(r[1]);
+      if (!(b > a) || a < prevEnd) fail(field);
+      prevEnd = b;
+      return [r[0], r[1]];
+    });
+    open += out[d].length;
+  }
+  if (!open) fail(field);
+  return out;
+}
+
 function sanitize(input, base) {
   const i = input && typeof input === 'object' ? input : {};
   const out = {};
@@ -97,24 +133,7 @@ function sanitize(input, base) {
   out.accent = /^#[0-9a-fA-F]{6}$/.test(i.accent) ? i.accent.toLowerCase() : fail('accent');
   out.mode = i.mode === 'dark' ? 'dark' : 'light';
 
-  // Ωράριο: έως 3 διαστήματα τη μέρα, σε σειρά, χωρίς επικάλυψη
-  const h = i.hours || {};
-  out.hours = {};
-  let open = 0;
-  for (const d of DAYS) {
-    const ranges = Array.isArray(h[d]) ? h[d] : [];
-    if (ranges.length > 3) fail('hours');
-    let prevEnd = -1;
-    out.hours[d] = ranges.map(r => {
-      if (!Array.isArray(r) || !TIME.test(r[0]) || !TIME.test(r[1])) fail('hours');
-      const a = tmin(r[0]), b = tmin(r[1]);
-      if (!(b > a) || a < prevEnd) fail('hours');
-      prevEnd = b;
-      return [r[0], r[1]];
-    });
-    open += out.hours[d].length;
-  }
-  if (!open) fail('hours');
+  out.hours = cleanHours(i.hours, 'hours');
 
   out.slotStep = [10, 15, 20, 30, 45, 60].includes(Number(i.slotStep)) ? Number(i.slotStep) : fail('slotStep');
   out.minNoticeHours = int(i.minNoticeHours, 0, 168);
@@ -155,6 +174,32 @@ function sanitize(input, base) {
     }
   });
   if (!out.services.some(s => s.active)) fail('services');
+
+  // Προσωπικό: όπως και οι υπηρεσίες, κανείς δεν σβήνεται (μόνο απενεργοποιείται), για τα παλιά ραντεβού
+  const svcIds = out.services.map(s => s.id);
+  const staffIn = Array.isArray(i.staff) ? i.staff.slice(0, 20) : [];
+  const seenSt = new Set();
+  out.staff = staffIn.map(p => {
+    let id = txt(p.id, 40);
+    if (!/^[a-z0-9_-]{1,40}$/.test(id)) id = 'p' + crypto.randomBytes(4).toString('hex');
+    if (seenSt.has(id)) fail('staff');
+    seenSt.add(id);
+    const name = txt(p.name, 60);
+    if (!name) fail('staff');
+    const ownHours = !!p.ownHours;
+    const allServices = p.allServices !== false;
+    const services = allServices ? null : (Array.isArray(p.services) ? p.services : []).filter(x => svcIds.includes(x));
+    if (!allServices && !services.length) fail('staff');
+    return { id, name, active: p.active !== false, ownHours, ...(ownHours ? { hours: cleanHours(p.hours, 'staffHours') } : {}),
+      allServices, ...(allServices ? {} : { services }) };
+  });
+  (base.staff || []).forEach(p => {
+    if (!seenSt.has(p.id)) out.staff.push({ id: p.id, name: p.name, active: false, ownHours: !!p.hours,
+      ...(p.hours ? { hours: p.hours } : {}), allServices: !Array.isArray(p.services), ...(Array.isArray(p.services) ? { services: p.services } : {}) });
+  });
+  // Κάθε ενεργή υπηρεσία πρέπει να την κάνει τουλάχιστον ένα ενεργό άτομο
+  const activeSt = out.staff.filter(p => p.active);
+  if (activeSt.length && out.services.some(sv => sv.active && !activeSt.some(p => p.allServices || p.services.includes(sv.id)))) fail('staffCoverage');
 
   return out;
 }

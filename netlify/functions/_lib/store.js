@@ -2,6 +2,7 @@
 //   appt/bookings/{biz}/{id}  -> το ραντεβού (στοιχεία πελάτη, κατάσταση, token ακύρωσης)
 //   appt/days/{biz}/{date}/{id} -> {s,e,ps,pe,k}  ό,τι πιάνει χρόνο εκείνη τη μέρα
 //                                   k: 'b' ραντεβού, 'x' μπλοκαρισμένο από τον διαχειριστή
+//                                   st: άτομο προσωπικού (χωρίς st = αφορά όλους)
 //   appt/rate/{hash}           -> όριο κρατήσεων ανά IP
 //   appt/settings/{biz}        -> ρυθμίσεις από το admin (βλ. settings.js)
 const crypto = require('crypto');
@@ -13,7 +14,9 @@ const bookingRef = (db, biz, id) => db.ref(`appt/bookings/${biz}/${id}`);
 // Atomic: γράφει το διάστημα μόνο αν δεν συγκρούεται με κάτι άλλο εκείνη τη μέρα.
 async function reserve(db, biz, date, id, entry) {
   const tx = await dayRef(db, biz, date).transaction(cur => {
-    const busy = Object.entries(cur || {}).filter(([k, x]) => k !== id && x && typeof x.s === 'number');
+    // Συγκρούεται μόνο με ό,τι αφορά το ίδιο άτομο ή όλους (διάστημα χωρίς st)
+    const busy = Object.entries(cur || {}).filter(([k, x]) => k !== id && x && typeof x.s === 'number' &&
+      (!entry.st || !x.st || x.st === entry.st));
     if (busy.some(([, x]) => conflicts(entry, x))) return;   // abort -> πιάστηκε
     return { ...(cur || {}), [id]: entry };
   });

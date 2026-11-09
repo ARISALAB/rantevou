@@ -85,6 +85,7 @@
     }
     const rows = `<div class="rows">
       <div><span>${t('svc')}</span><b>${esc(info.service[lang])}</b></div>
+      ${info.staffName ? `<div><span>${lang === 'en' ? 'With' : 'Με'}</span><b>${esc(info.staffName)}</b></div>` : ''}
       <div><span>${t('when')}</span><b>${esc(new Date(info.date + 'T12:00:00').toLocaleDateString(t('locale'), { weekday: 'long', day: 'numeric', month: 'long' }))}, ${esc(info.time)}–${hm(info.end)}</b></div>
       <div><span>${t('how')}</span><b>${esc(info.modes[info.mode][lang])}</b></div></div>`;
     const rebook = `<a class="btn gold" href="/${encodeURIComponent(P.b)}?lang=${lang}">${t('rebook')}</a>`;

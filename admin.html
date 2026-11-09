@@ -163,6 +163,7 @@
   </nav>
   <div id="vBookings">
   <div class="stats" id="stats"></div>
+  <div class="tabs" id="staffFilter" aria-label="Άτομο" hidden></div>
   <div class="tabs" role="tablist" id="tabs"></div>
   <div id="list"></div>
 
@@ -171,6 +172,7 @@
     <p>Μέρες ή ώρες που δεν μπορείτε (άδεια, άλλο ραντεβού). Δεν θα εμφανίζονται για κράτηση.</p>
     <form class="blockform" id="blockForm">
       <input type="date" id="bDate" required>
+      <select id="bStaff" hidden aria-label="Για ποιον"></select>
       <select id="bType"><option value="all">Όλη τη μέρα</option><option value="range">Από–έως</option></select>
       <input type="time" id="bFrom" step="1800" value="09:00" hidden>
       <input type="time" id="bTo" step="1800" value="12:00" hidden>
@@ -195,7 +197,7 @@
     set(v, remember) { try { sessionStorage.setItem(KEYNAME, v); if (remember) localStorage.setItem(KEYNAME, v); } catch (e) {} },
     clear() { try { sessionStorage.removeItem(KEYNAME); localStorage.removeItem(KEYNAME); } catch (e) {} },
   };
-  let KEY = store.get(), data = null, tab = 'upcoming';
+  let KEY = store.get(), data = null, tab = 'upcoming', who = '';
   $('bookLink').href = '/' + encodeURIComponent(B);
 
   const STATUS = { pending: 'Θέλει επιβεβαίωση', confirmed: 'Επιβεβαιωμένο', cancelled: 'Ακυρωμένο' };
@@ -229,7 +231,20 @@
   function render() {
     const today = data.today;
     const svcName = id => (data.services.find(s => s.id === id) || {}).name || id;
-    const live = data.bookings.filter(b => b.status !== 'cancelled');
+    const people = data.staff || [];
+    const stName = id => (people.find(p => p.id === id) || {}).name || '';
+    // Φίλτρο ανά άτομο (μόνο όταν υπάρχει προσωπικό)
+    $('staffFilter').hidden = people.length < 2;
+    if (who && !people.some(p => p.id === who)) who = '';
+    $('staffFilter').innerHTML = [{ id: '', name: 'Όλοι' }, ...people].map(p =>
+      `<button class="tab" type="button" data-who="${esc(p.id)}" aria-selected="${who === p.id}">${esc(p.name)}</button>`).join('');
+    $('staffFilter').querySelectorAll('[data-who]').forEach(b => b.onclick = () => { who = b.dataset.who; render(); });
+    $('bStaff').hidden = people.length < 1;
+    const keep = $('bStaff').value;
+    $('bStaff').innerHTML = `<option value="">Για όλους</option>` + people.filter(p => p.active).map(p => `<option value="${esc(p.id)}">Για: ${esc(p.name)}</option>`).join('');
+    $('bStaff').value = keep;
+    const mine = b => !who || b.staff === who;
+    const live = data.bookings.filter(b => b.status !== 'cancelled' && mine(b));
     const upcoming = live.filter(b => b.date >= today);
     const pending = upcoming.filter(b => b.status === 'pending');
     const weekEnd = new Date(today + 'T12:00:00'); weekEnd.setDate(weekEnd.getDate() + 7);
@@ -244,7 +259,7 @@
       upcoming: { label: 'Επόμενα', items: upcoming },
       pending: { label: 'Θέλουν επιβεβαίωση', items: pending },
       past: { label: 'Προηγούμενα', items: live.filter(b => b.date < today).reverse() },
-      cancelled: { label: 'Ακυρωμένα', items: data.bookings.filter(b => b.status === 'cancelled') },
+      cancelled: { label: 'Ακυρωμένα', items: data.bookings.filter(b => b.status === 'cancelled' && mine(b)) },
     };
     $('tabs').innerHTML = Object.entries(lists).map(([k, v]) =>
       `<button class="tab" role="tab" type="button" data-tab="${k}" aria-selected="${k === tab}">${v.label}<span class="n">${v.items.length}</span></button>`).join('');
@@ -261,7 +276,7 @@
           <article class="bk ${b.status}">
             <div class="tm">${esc(b.time)}<small>έως ${esc(b.end)}</small></div>
             <div class="who"><b>${esc(svcName(b.service))}</b><span class="badge ${b.status}">${STATUS[b.status]}</span>${b.source === 'google' ? '<span class="badge src" title="Από το κουμπί κράτησης του Google">Google</span>' : b.source ? `<span class="badge src">${esc(b.source)}</span>` : ''}
-              <div>${esc(b.name)}${b.company ? ' · ' + esc(b.company) : ''} · ${esc((data.modes[b.mode] || {}).el || b.mode)}</div></div>
+              <div>${b.staff ? `<b style="font-weight:550;color:var(--text)">με ${esc(stName(b.staff) || b.staffName || '')}</b> · ` : ''}${esc(b.name)}${b.company ? ' · ' + esc(b.company) : ''} · ${esc((data.modes[b.mode] || {}).el || b.mode)}</div></div>
             <div class="acts">
               ${b.status === 'pending' ? `<button class="btn ok" data-act="confirm" data-id="${b.id}">✓ Επιβεβαίωση</button>` : ''}
               ${b.status !== 'cancelled' && b.date >= today ? `<button class="btn no" data-act="cancel" data-id="${b.id}">Ακύρωση</button>` : ''}
@@ -276,7 +291,7 @@
     $('list').querySelectorAll('[data-act]').forEach(btn => btn.onclick = () => act(btn));
 
     $('blocks').innerHTML = data.blocks.length ? data.blocks.map(x => `
-      <div class="blk"><b>${esc(longDate(x.date))}</b><span>${x.allDay ? 'όλη τη μέρα' : esc(x.from) + '–' + esc(x.to)}${x.note ? ' · ' + esc(x.note) : ''}</span>
+      <div class="blk"><b>${esc(longDate(x.date))}</b><span>${x.staff ? esc(stName(x.staff)) + ' · ' : ''}${x.allDay ? 'όλη τη μέρα' : esc(x.from) + '–' + esc(x.to)}${x.note ? ' · ' + esc(x.note) : ''}</span>
       <button class="btn" type="button" data-unblock="${x.id}" data-date="${x.date}">Αφαίρεση</button></div>`).join('') : '';
     $('blocks').querySelectorAll('[data-unblock]').forEach(btn => btn.onclick = async () => {
       btn.disabled = true;
@@ -308,7 +323,7 @@
   $('bType').onchange = () => { const r = $('bType').value === 'range'; $('bFrom').hidden = $('bTo').hidden = !r; };
   $('blockForm').onsubmit = async e => {
     e.preventDefault();
-    const body = { action: 'block', date: $('bDate').value, note: $('bNote').value };
+    const body = { action: 'block', date: $('bDate').value, note: $('bNote').value, staff: $('bStaff').value || '' };
     if ($('bType').value === 'range') { body.from = $('bFrom').value; body.to = $('bTo').value; }
     try { await api(body); toast('Μπλοκαρίστηκε'); $('bNote').value = ''; await load(); }
     catch (err) { if (err.message !== 'unauthorized') toast('Ελέγξτε ημερομηνία και ώρες'); }
@@ -324,6 +339,9 @@
     hours: 'Ελέγξτε το ωράριο: κάθε διάστημα πρέπει να τελειώνει μετά την αρχή του, να μην πέφτει πάνω στο προηγούμενο, και να υπάρχει τουλάχιστον μία ανοιχτή μέρα.',
     slotStep: 'Διαλέξτε κάθε πόσα λεπτά ξεκινούν τα ραντεβού.', minNoticeHours: 'Η ελάχιστη προειδοποίηση πρέπει να είναι 0–168 ώρες.',
     maxDaysAhead: 'Οι μέρες κράτησης μπροστά πρέπει να είναι 1–365.',
+    staff: 'Ελέγξτε το προσωπικό: κάθε άτομο θέλει όνομα, και αν δεν κάνει όλες τις υπηρεσίες, τουλάχιστον μία.',
+    staffHours: 'Ελέγξτε το ωράριο του προσωπικού: κάθε διάστημα πρέπει να τελειώνει μετά την αρχή του και να υπάρχει τουλάχιστον μία ανοιχτή μέρα.',
+    staffCoverage: 'Υπάρχει ενεργή υπηρεσία που δεν την κάνει κανένα ενεργό άτομο. Τσεκάρετε την υπηρεσία σε κάποιον ή απενεργοποιήστε την.',
     services: 'Ελέγξτε τις υπηρεσίες: κάθε μία θέλει όνομα, διάρκεια 5–600 λεπτά και τουλάχιστον έναν τρόπο. Πρέπει να μείνει τουλάχιστον μία ενεργή.',
   };
   let S = null, view = 'bookings', dirty = false;
@@ -388,6 +406,13 @@
         <button class="btn" type="button" id="addSvc">+ Νέα υπηρεσία</button>
       </section>
 
+      <section class="box">
+        <h2>Προσωπικό</h2>
+        <p>Αν ραντεβού δέχονται περισσότερα άτομα, προσθέστε τα εδώ. Ο πελάτης διαλέγει άτομο ή «Οποιοσδήποτε». Αν δεν προσθέσετε κανέναν, η επιχείρηση έχει ένα ημερολόγιο.</p>
+        <div id="staffList">${S.staff.map((p, i) => staffCard(p, i)).join('')}</div>
+        <button class="btn" type="button" id="addStaff">+ Νέο άτομο</button>
+      </section>
+
       <div class="savebar"><span id="saveState"></span><button class="btn gold" type="submit" id="saveBtn">Αποθήκευση</button></div>`;
 
     $('copyMon').onclick = () => {
@@ -403,19 +428,32 @@
       changed(); renderSettings();
       const last = $('svcs').lastElementChild; last.scrollIntoView({ behavior: 'smooth', block: 'center' }); last.querySelector('input[data-k="nameEl"]').focus();
     };
-    $('hours').querySelectorAll('[data-day-open]').forEach(cb => cb.onchange = () => {
+    const VS = $('vSettings');
+    VS.querySelectorAll('[data-day-open]').forEach(cb => cb.onchange = () => {
       collect(); const d = cb.dataset.dayOpen;
-      S.hours[d] = cb.checked ? [['09:00', '17:00']] : [];
+      hoursOf(cb.dataset.hk)[d] = cb.checked ? [['09:00', '17:00']] : [];
       changed(); renderSettings();
     });
-    $('hours').querySelectorAll('[data-add-range]').forEach(b => b.onclick = () => {
-      collect(); const d = b.dataset.addRange, r = S.hours[d], last = r[r.length - 1];
+    VS.querySelectorAll('[data-add-range]').forEach(b => b.onclick = () => {
+      collect(); const d = b.dataset.addRange, r = hoursOf(b.dataset.hk)[d], last = r[r.length - 1];
       r.push([last ? last[1] : '09:00', last && last[1] < '20:00' ? addH(last[1], 3) : '23:59']);
       changed(); renderSettings();
     });
-    $('hours').querySelectorAll('[data-del-range]').forEach(b => b.onclick = () => {
+    VS.querySelectorAll('[data-del-range]').forEach(b => b.onclick = () => {
       collect(); const [d, i] = b.dataset.delRange.split(':');
-      S.hours[d].splice(Number(i), 1); changed(); renderSettings();
+      hoursOf(b.dataset.hk)[d].splice(Number(i), 1); changed(); renderSettings();
+    });
+    // Προσωπικό
+    $('addStaff').onclick = () => {
+      collect();
+      S.staff.push({ id: '', name: '', active: true, ownHours: false, hours: JSON.parse(JSON.stringify(S.hours)), allServices: true, services: S.services.map(x => x.id), open: true });
+      changed(); renderSettings();
+      const last = $('staffList').lastElementChild; last.scrollIntoView({ behavior: 'smooth', block: 'center' }); last.querySelector('[data-sk="name"]').focus();
+    };
+    $('staffList').querySelectorAll('details').forEach(det => det.ontoggle = () => { S.staff[det.dataset.i].open = det.open; });
+    $('staffList').querySelectorAll('[data-sk="active"],[data-sk="ownHours"],[data-sk="allServices"]').forEach(cb => cb.onchange = () => { collect(); changed(); renderSettings(); });
+    $('staffList').querySelectorAll('[data-sk="name"]').forEach(x => x.oninput = () => {
+      x.closest('details').querySelector('summary b').textContent = x.value || 'Νέο άτομο';
     });
     $('svcs').querySelectorAll('details').forEach(det => det.ontoggle = () => { S.services[det.dataset.i].open = det.open; });
     $('svcs').querySelectorAll('[data-k="active"]').forEach(cb => cb.onchange = () => { collect(); changed(); renderSettings(); });
@@ -429,16 +467,35 @@
   const addH = (t, n) => { const h = Math.min(23, Number(t.slice(0, 2)) + n); return String(h).padStart(2, '0') + t.slice(2); };
   function changed() { dirty = true; const el = $('saveState'); if (el) el.textContent = 'Υπάρχουν αλλαγές που δεν αποθηκεύτηκαν'; }
 
-  function hourRow(d, label) {
-    const r = S.hours[d] || [];
-    return `<div class="hrow" data-day="${d}">
-      <label class="dn sw"><input type="checkbox" data-day-open="${d}" ${r.length ? 'checked' : ''}>${label}</label>
+  // Επεξεργαστής ωραρίου: key 'biz' = ωράριο επιχείρησης, αριθμός = ωράριο ατόμου S.staff[key]
+  const hoursOf = key => key === 'biz' ? S.hours : S.staff[Number(key)].hours;
+  function hourRow(d, label, key = 'biz') {
+    const r = hoursOf(key)[d] || [];
+    return `<div class="hrow" data-day="${d}" data-hk="${key}">
+      <label class="dn sw"><input type="checkbox" data-day-open="${d}" data-hk="${key}" ${r.length ? 'checked' : ''}>${label}</label>
       <div class="ranges">${r.length ? r.map((x, i) => `
         <span class="range"><input type="time" data-r="${i}" data-p="0" value="${esc(x[0])}" aria-label="${label} από">–<input type="time" data-r="${i}" data-p="1" value="${esc(x[1])}" aria-label="${label} έως">
-        ${r.length > 1 ? `<button class="x" type="button" data-del-range="${d}:${i}" aria-label="Αφαίρεση διαστήματος">×</button>` : ''}</span>`).join('')
-        + (r.length < 3 ? `<button class="link" type="button" data-add-range="${d}">+ διάστημα</button>` : '')
+        ${r.length > 1 ? `<button class="x" type="button" data-del-range="${d}:${i}" data-hk="${key}" aria-label="Αφαίρεση διαστήματος">×</button>` : ''}</span>`).join('')
+        + (r.length < 3 ? `<button class="link" type="button" data-add-range="${d}" data-hk="${key}">+ διάστημα</button>` : '')
         : '<span class="closed">Κλειστά</span>'}</div>
     </div>`;
+  }
+
+  function staffCard(p, i) {
+    const svcs = S.services.filter(x => x.active);
+    const sub = !p.active ? 'ανενεργό' : [p.ownHours ? 'δικό του ωράριο' : 'ωράριο επιχείρησης', p.allServices ? 'όλες οι υπηρεσίες' : `${p.services.length} υπηρεσίες`].join(' · ');
+    return `<details class="svc ${p.active ? '' : 'off'}" data-i="${i}" ${p.open ? 'open' : ''}>
+      <summary><b>${esc(p.name || 'Νέο άτομο')}</b><small>${esc(sub)}</small><span class="sp"></span>
+        <label class="sw" onclick="event.stopPropagation()"><input type="checkbox" data-sk="active" ${p.active ? 'checked' : ''}>Ενεργό</label></summary>
+      <div class="body"><div class="grid">
+        ${fld('Όνομα', `<input data-sk="name" value="${esc(p.name)}" maxlength="60" placeholder="π.χ. Μαρία">`)}
+        <div class="fld"><span>Ωράριο</span><label class="sw"><input type="checkbox" data-sk="ownHours" ${p.ownHours ? 'checked' : ''}>Δικό του ωράριο</label>
+          <small class="hint">${p.ownHours ? 'Δέχεται ραντεβού μόνο στις ώρες παρακάτω.' : 'Ίδιο με το ωράριο της επιχείρησης.'}</small></div>
+        ${p.ownHours ? `<div class="fld full">${DAYS.map(([d, label]) => hourRow(d, label, String(i))).join('')}</div>` : ''}
+        <div class="fld full"><span>Υπηρεσίες</span><label class="sw"><input type="checkbox" data-sk="allServices" ${p.allServices ? 'checked' : ''}>Κάνει όλες τις υπηρεσίες</label>
+          ${p.allServices ? '' : `<div class="checks" style="margin-top:8px">${svcs.map(x => `<label><input type="checkbox" data-ssvc="${esc(x.id)}" ${p.services.includes(x.id) ? 'checked' : ''}>${esc(x.name.el || 'Νέα υπηρεσία')}</label>`).join('')}</div>`}</div>
+      </div></div>
+    </details>`;
   }
 
   function svcCard(s, i, modes) {
@@ -473,12 +530,17 @@
     S.name = v('sName'); S.phone = v('sPhone'); S.tagline = { el: v('sTagEl'), en: v('sTagEn') };
     S.ownerEmail = v('sEmail'); S.address = v('sAddr'); S.site = v('sSite'); S.logo = v('sLogo'); S.accent = $('sAccent').value; S.mode = $('sMode').value;
     S.slotStep = Number($('sStep').value); S.minNoticeHours = Number(v('sNotice')); S.maxDaysAhead = Number(v('sAhead'));
-    DAYS.forEach(([d]) => {
-      const row = document.querySelector(`.hrow[data-day="${d}"]`);
-      const ins = row.querySelectorAll('input[type=time]');
+    $('staffList').querySelectorAll('details').forEach(det => {
+      const p = S.staff[det.dataset.i], g = key => det.querySelector(`[data-sk="${key}"]`);
+      p.open = det.open; p.active = g('active').checked; p.name = g('name').value.trim();
+      p.ownHours = g('ownHours').checked; p.allServices = g('allServices').checked;
+      const boxes = det.querySelectorAll('[data-ssvc]');
+      if (boxes.length) p.services = [...boxes].filter(x => x.checked).map(x => x.dataset.ssvc);
+    });
+    document.querySelectorAll('#vSettings .hrow').forEach(row => {
       const out = [];
-      ins.forEach(x => { const i = Number(x.dataset.r); (out[i] = out[i] || ['', ''])[Number(x.dataset.p)] = x.value; });
-      S.hours[d] = out;
+      row.querySelectorAll('input[type=time]').forEach(x => { const i = Number(x.dataset.r); (out[i] = out[i] || ['', ''])[Number(x.dataset.p)] = x.value; });
+      hoursOf(row.dataset.hk)[row.dataset.day] = out;
     });
     $('svcs').querySelectorAll('details').forEach(det => {
       const s = S.services[det.dataset.i], g = key => det.querySelector(`[data-k="${key}"]`);
@@ -504,8 +566,8 @@
       if (r.status === 401) { logout('Λάθος κλειδί.'); return; }
       if (r.status === 400 && d.field) { markBad(d.field); alert(FIELD_MSG[d.field] || 'Κάτι δεν είναι σωστό.'); return; }
       if (!r.ok) throw new Error('save');
-      const open = S.services.map(s => s.open);
-      S = d.settings; S.services.forEach((s, i) => { s.open = open[i]; });
+      const open = S.services.map(s => s.open), openSt = S.staff.map(p => p.open);
+      S = d.settings; S.services.forEach((s, i) => { s.open = open[i]; }); S.staff.forEach((p, i) => { p.open = openSt[i]; });
       dirty = false; renderSettings(); toast('Αποθηκεύτηκε · ισχύει ήδη στη σελίδα κράτησης');
       $('bizName').textContent = S.name; document.title = S.name + ' · Ραντεβού';
     } catch (err) { toast('Σφάλμα αποθήκευσης, δοκιμάστε ξανά'); }
@@ -513,7 +575,7 @@
   };
   function markBad(field) {
     const map = { name: 'sName', phone: 'sPhone', ownerEmail: 'sEmail', site: 'sSite', logo: 'sLogo', minNoticeHours: 'sNotice', maxDaysAhead: 'sAhead', slotStep: 'sStep' };
-    const el = map[field] ? $(map[field]) : field === 'hours' ? $('hours').closest('.box') : field === 'services' ? $('svcs').closest('.box') : null;
+    const el = map[field] ? $(map[field]) : field === 'hours' ? $('hours').closest('.box') : field === 'services' ? $('svcs').closest('.box') : /^staff/.test(field) ? $('staffList').closest('.box') : null;
     if (!el) return;
     el.classList.add('bad'); el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
