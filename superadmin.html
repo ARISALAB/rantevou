@@ -100,6 +100,7 @@
   <span class="akron" aria-hidden="true"><img src="https://www.arakronservices.gr/favicon.svg?v=3" alt=""></span>
   <div><b>Superadmin</b><small>Πλατφόρμα ραντεβού · AR Akron Services</small></div>
   <span class="sp"></span>
+  <button class="btn" id="backupBtn" type="button" hidden>Λήψη αντιγράφου</button>
   <a class="btn" href="/" target="_blank" rel="noopener">Αρχική ↗</a>
   <button class="btn" id="logout" type="button" hidden>Έξοδος</button>
 </div></header>
@@ -165,7 +166,7 @@
   function toast(m) { const el = document.createElement('div'); el.className = 'toast'; el.textContent = m; document.body.appendChild(el); setTimeout(() => el.remove(), 2400); }
   function logout(msg) {
     try { sessionStorage.removeItem(KN); } catch (e) {}
-    KEY = null; $('main').hidden = true; $('logout').hidden = true; $('login').hidden = false; $('loginErr').textContent = msg || '';
+    KEY = null; $('main').hidden = true; $('logout').hidden = true; $('backupBtn').hidden = true; $('login').hidden = false; $('loginErr').textContent = msg || '';
   }
   async function copy(text, label) {
     try { await navigator.clipboard.writeText(text); toast((label || 'Αντιγράφηκε')); } catch (e) { prompt('Αντιγράψτε:', text); }
@@ -186,7 +187,7 @@
     const r = await api({ action: 'list' });
     if (!r.ok) throw new Error('load');
     data = r.data;
-    $('login').hidden = true; $('main').hidden = false; $('logout').hidden = false;
+    $('login').hidden = true; $('main').hidden = false; $('logout').hidden = false; $('backupBtn').hidden = false;
     render();
   }
 
@@ -307,6 +308,19 @@ ${d.links.admin}
     catch (err) { if (err.message !== 'unauthorized') $('loginErr').textContent = 'Δεν ήταν δυνατή η σύνδεση.'; }
   };
   $('logout').onclick = () => logout();
+  $('backupBtn').onclick = async () => {
+    const btn = $('backupBtn'); btn.disabled = true;
+    try {
+      const r = await api({ action: 'backup' });
+      if (!r.ok) throw new Error('backup');
+      const blob = new Blob([JSON.stringify(r.data, null, 1)], { type: 'application/json' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = `rantevou-backup-${new Date().toISOString().slice(0, 10)}.json`; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      toast(`${r.data.stats.bookings} κρατήσεις, ${r.data.stats.businesses} επιχειρήσεις`);
+    } catch (e) { if (e.message !== 'unauthorized') toast('Σφάλμα αντιγράφου'); }
+    finally { btn.disabled = false; }
+  };
   if (KEY) load().catch(() => {});
 })();
 </script>

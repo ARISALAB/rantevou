@@ -4,6 +4,7 @@
 // POST { key, action: "resetKey", id }                 -> νέο κλειδί admin (μόνο για επιχειρήσεις της βάσης)
 // POST { key, action: "setActive", id, active }        -> παύση / ενεργοποίηση (σε παύση: η σελίδα κράτησης δεν ανοίγει)
 // POST { key, action: "setLead", id, status }          -> κατάσταση αιτήματος: new | contacted | won | lost
+// POST { key, action: "backup" }                       -> όλη η βάση των ραντεβού σε JSON (λήψη από το superadmin)
 const { json, preflight, parseBody, siteUrl } = require('./_lib/respond');
 const { getDb } = require('./_lib/firebase');
 const { str } = require('./_lib/core');
@@ -107,6 +108,12 @@ exports.handler = async (event) => {
         if (!(await ref.get()).exists()) return json(404, { error: 'not_found' });
         await ref.update({ status: body.status });
         return json(200, { ok: true });
+      }
+
+      case 'backup': {
+        const { snapshot } = require('./appt-backup');
+        const { data, stats } = await snapshot();
+        return json(200, { exportedAt: new Date().toISOString(), stats, appt: data });
       }
 
       default:

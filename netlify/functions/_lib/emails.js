@@ -11,7 +11,8 @@ const T = {
     pending: 'Λάβαμε το αίτημά σας. Θα επικοινωνήσουμε μαζί σας σύντομα για να το επιβεβαιώσουμε.',
     approved: 'Το ραντεβού σας επιβεβαιώθηκε.',
     cancelled: 'Το ραντεβού σας ακυρώθηκε.',
-    subj: { confirmed: 'Επιβεβαίωση ραντεβού', pending: 'Λάβαμε το αίτημά σας', approved: 'Επιβεβαίωση ραντεβού', cancelled: 'Ακύρωση ραντεβού' },
+    reminder: 'Σας θυμίζουμε το ραντεβού σας. Σας περιμένουμε!',
+    subj: { confirmed: 'Επιβεβαίωση ραντεβού', pending: 'Λάβαμε το αίτημά σας', approved: 'Επιβεβαίωση ραντεβού', cancelled: 'Ακύρωση ραντεβού', reminder: 'Υπενθύμιση ραντεβού' },
     addCal: 'Προσθήκη στο Google Calendar',
     cancelQ: 'Δεν μπορείτε να έρθετε; Μπορείτε να ακυρώσετε εδώ:',
     cancelBtn: 'Ακύρωση ραντεβού',
@@ -26,7 +27,8 @@ const T = {
     pending: 'We received your request. We will contact you shortly to confirm it.',
     approved: 'Your appointment is confirmed.',
     cancelled: 'Your appointment has been cancelled.',
-    subj: { confirmed: 'Appointment confirmed', pending: 'We received your request', approved: 'Appointment confirmed', cancelled: 'Appointment cancelled' },
+    reminder: 'A reminder of your appointment. See you soon!',
+    subj: { confirmed: 'Appointment confirmed', pending: 'We received your request', approved: 'Appointment confirmed', cancelled: 'Appointment cancelled', reminder: 'Appointment reminder' },
     addCal: 'Add to Google Calendar',
     cancelQ: "Can't make it? You can cancel here:",
     cancelBtn: 'Cancel appointment',
@@ -112,7 +114,7 @@ const from = biz => `"${String(biz.name || 'Ραντεβού').replace(/["\\<>\r
 // Οι ειδοποιήσεις πάνε στο email που έχει ορίσει η ίδια η επιχείρηση στις Ρυθμίσεις
 const ownerTo = biz => biz.ownerEmail;
 
-// kind: confirmed | pending | approved | cancelled
+// kind: confirmed | pending | approved | cancelled | reminder
 async function toCustomer(kind, biz, svc, b) {
   const lang = b.lang === 'en' ? 'en' : 'el', t = T[lang];
   const gold = (biz.theme && biz.theme.accent) || '#c9a24a';
@@ -121,7 +123,7 @@ async function toCustomer(kind, biz, svc, b) {
   const inner = `<p style="margin:0 0 6px">${t.hello(esc(b.name))}</p>
 <p style="margin:0;font-size:17px;font-weight:bold">${t[kind]}</p>
 ${detailsTable(biz, svc, b, lang)}
-${live && kind !== 'pending' ? btn(calendarLink(biz, svc, b, lang), t.addCal, gold) : ''}
+${live && kind !== 'pending' && kind !== 'reminder' ? btn(calendarLink(biz, svc, b, lang), t.addCal, gold) : ''}
 ${live ? `<p style="margin:22px 0 6px;color:#555;font-size:14px">${t.cancelQ}</p>${btn(cancelUrl, t.cancelBtn, '#e9e5dc')}` : btn(`${siteUrl()}/${biz.id}?lang=${lang}`, t.rebook, gold)}`;
   const msg = {
     from: from(biz), to: b.email, reply_to: ownerTo(biz),
@@ -176,4 +178,18 @@ ${lead.message ? `<p style="margin:0;padding:12px;background:#faf8f4;border-radi
   });
 }
 
-module.exports = { toCustomer, toOwner, leadToPlatform, niceDate, calendarLink };
+// Ημερήσιο αντίγραφο ασφαλείας προς τον διαχειριστή της πλατφόρμας
+async function backupToPlatform(to, day, gz, stats) {
+  const platform = { name: 'Ραντεβού · AR Akron Services', phone: '', site: siteUrl(), theme: { accent: '#2a3dd1' } };
+  const inner = `<p style="margin:0 0 4px;font-size:18px;font-weight:bold">Αντίγραφο ασφαλείας ${esc(day)}</p>
+<p style="margin:12px 0;font-size:15px">${stats.businesses} επιχειρήσεις · ${stats.bookings} κρατήσεις · ${stats.leads} αιτήματα</p>
+<p style="margin:0;font-size:13px;color:#777">Το συνημμένο αρχείο έχει όλη τη βάση των ραντεβού. Περιέχει προσωπικά δεδομένα πελατών: μην το προωθείτε.</p>`;
+  return send({
+    from: `"Ραντεβού · AR Akron" <${senderAddress()}>`, to,
+    subject: `🗄️ Αντίγραφο ασφαλείας ραντεβού · ${day}`,
+    html: shell(platform, inner),
+    attachments: [{ filename: `rantevou-backup-${day}.json.gz`, content: gz.toString('base64') }],
+  });
+}
+
+module.exports = { toCustomer, toOwner, leadToPlatform, backupToPlatform, niceDate, calendarLink };

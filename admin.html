@@ -339,6 +339,7 @@
     hours: 'Ελέγξτε το ωράριο: κάθε διάστημα πρέπει να τελειώνει μετά την αρχή του, να μην πέφτει πάνω στο προηγούμενο, και να υπάρχει τουλάχιστον μία ανοιχτή μέρα.',
     slotStep: 'Διαλέξτε κάθε πόσα λεπτά ξεκινούν τα ραντεβού.', minNoticeHours: 'Η ελάχιστη προειδοποίηση πρέπει να είναι 0–168 ώρες.',
     maxDaysAhead: 'Οι μέρες κράτησης μπροστά πρέπει να είναι 1–365.',
+    remindHours: 'Διαλέξτε πότε στέλνεται η υπενθύμιση.',
     staff: 'Ελέγξτε το προσωπικό: κάθε άτομο θέλει όνομα, και αν δεν κάνει όλες τις υπηρεσίες, τουλάχιστον μία.',
     staffHours: 'Ελέγξτε το ωράριο του προσωπικού: κάθε διάστημα πρέπει να τελειώνει μετά την αρχή του και να υπάρχει τουλάχιστον μία ανοιχτή μέρα.',
     staffCoverage: 'Υπάρχει ενεργή υπηρεσία που δεν την κάνει κανένα ενεργό άτομο. Τσεκάρετε την υπηρεσία σε κάποιον ή απενεργοποιήστε την.',
@@ -396,6 +397,7 @@
           ${fld('Τα ραντεβού ξεκινούν κάθε', `<select id="sStep">${[10, 15, 20, 30, 45, 60].map(n => `<option value="${n}" ${n === S.slotStep ? 'selected' : ''}>${n} λεπτά</option>`).join('')}</select>`)}
           ${fld('Ελάχιστη προειδοποίηση (ώρες)', inp('sNotice', S.minNoticeHours, 'type="number" min="0" max="168" step="1" inputmode="numeric"') + '<small class="hint">Π.χ. 12 = δεν κλείνει κανείς ραντεβού για τις επόμενες 12 ώρες.</small>')}
           ${fld('Κρατήσεις έως (μέρες μπροστά)', inp('sAhead', S.maxDaysAhead, 'type="number" min="1" max="365" step="1" inputmode="numeric"'))}
+          ${fld('Υπενθύμιση στον πελάτη με email', `<select id="sRemind">${[[0, 'Καμία'], [1, '1 ώρα πριν'], [2, '2 ώρες πριν'], [3, '3 ώρες πριν'], [24, 'Την προηγούμενη μέρα (24 ώρες πριν)']].map(([v, l]) => `<option value="${v}" ${v === S.remindHours ? 'selected' : ''}>${l}</option>`).join('')}</select>` + '<small class="hint">Λιγότερα «ξέχασα το ραντεβού». Δεν στέλνεται αν ο πελάτης έκλεισε λίγο πριν.</small>')}
         </div>
       </section>
 
@@ -529,7 +531,7 @@
     const v = id => $(id).value.trim();
     S.name = v('sName'); S.phone = v('sPhone'); S.tagline = { el: v('sTagEl'), en: v('sTagEn') };
     S.ownerEmail = v('sEmail'); S.address = v('sAddr'); S.site = v('sSite'); S.logo = v('sLogo'); S.accent = $('sAccent').value; S.mode = $('sMode').value;
-    S.slotStep = Number($('sStep').value); S.minNoticeHours = Number(v('sNotice')); S.maxDaysAhead = Number(v('sAhead'));
+    S.slotStep = Number($('sStep').value); S.minNoticeHours = Number(v('sNotice')); S.maxDaysAhead = Number(v('sAhead')); S.remindHours = Number($('sRemind').value);
     $('staffList').querySelectorAll('details').forEach(det => {
       const p = S.staff[det.dataset.i], g = key => det.querySelector(`[data-sk="${key}"]`);
       p.open = det.open; p.active = g('active').checked; p.name = g('name').value.trim();

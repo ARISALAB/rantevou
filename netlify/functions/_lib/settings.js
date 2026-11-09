@@ -32,7 +32,7 @@ function merge(base, s) {
   if (!s || typeof s !== 'object') return base;
   const baseSvc = id => (base.services || []).find(x => x.id === id) || {};
   const out = { ...base };
-  ['name', 'phone', 'ownerEmail', 'address', 'site', 'logo', 'hours', 'slotStep', 'minNoticeHours', 'maxDaysAhead']
+  ['name', 'phone', 'ownerEmail', 'address', 'site', 'logo', 'hours', 'slotStep', 'minNoticeHours', 'maxDaysAhead', 'remindHours']
     .forEach(k => { if (s[k] !== undefined) out[k] = s[k]; });
   if (s.tagline) out.tagline = { ...(base.tagline || {}), ...s.tagline };
   if (s.accent || s.mode) out.theme = { ...(base.theme || {}), ...(s.accent ? { accent: s.accent } : {}), ...(s.mode ? { mode: s.mode } : {}) };
@@ -68,6 +68,10 @@ async function loadBusiness(id, { includeSuspended = false } = {}) {
   }
 }
 
+// Υπενθύμιση στον πελάτη Χ ώρες πριν (0 = καμία). Προεπιλογή: 2 ώρες.
+const REMIND = [0, 1, 2, 3, 24];
+const remindHoursOf = biz => (REMIND.includes(biz.remindHours) ? biz.remindHours : 2);
+
 const activeServices = biz => biz.services.filter(s => s.active !== false);
 
 // Ό,τι βλέπει και αλλάζει ο ιδιοκτήτης στην καρτέλα «Ρυθμίσεις»
@@ -80,6 +84,7 @@ function editable(biz) {
     mode: (biz.theme || {}).mode === 'dark' ? 'dark' : 'light',
     hours: biz.hours, slotStep: biz.slotStep || 30,
     minNoticeHours: biz.minNoticeHours || 0, maxDaysAhead: biz.maxDaysAhead || 60,
+    remindHours: remindHoursOf(biz),
     modes: Object.fromEntries(Object.entries(biz.modes || {}).map(([k, v]) => [k, v.el])),
     staff: (biz.staff || []).map(p => ({
       id: p.id, name: p.name, active: p.active !== false,
@@ -154,6 +159,7 @@ function sanitize(input, base) {
   out.minNoticeHours = int(i.minNoticeHours, 0, 168);
   if (out.minNoticeHours === null) fail('minNoticeHours');
   out.maxDaysAhead = int(i.maxDaysAhead, 1, 365) || fail('maxDaysAhead');
+  out.remindHours = REMIND.includes(Number(i.remindHours)) ? Number(i.remindHours) : fail('remindHours');
 
   // Υπηρεσίες: οι παλιές δεν σβήνονται ποτέ (μόνο απενεργοποιούνται), για να βγαίνουν σωστά τα παλιά ραντεβού
   const modeKeys = Object.keys(base.modes || {});
@@ -229,4 +235,4 @@ async function saveSettings(id, input) {
   return merge(base, value);
 }
 
-module.exports = { baseBusiness, fileBusiness, loadBusiness, activeServices, editable, sanitize, saveSettings, merge };
+module.exports = { remindHoursOf, baseBusiness, fileBusiness, loadBusiness, activeServices, editable, sanitize, saveSettings, merge };

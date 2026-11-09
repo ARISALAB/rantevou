@@ -364,5 +364,50 @@ const t = async (label, f) => { await f(); ok++; console.log('✓', label); };
     assert.equal((await call('appt-super', { ...S, action: 'resetKey', id: 'arakron' })).code, 400, 'όχι για επιχείρηση από αρχείο');
   });
 
+  await t('υπενθυμίσεις 2 ώρες πριν, χωρίς διπλές, όχι για κρατήσεις της τελευταίας στιγμής · αντίγραφο ασφαλείας', async () => {
+    const db = global.__APPT_TEST_DB__;
+    const put = (id, s, created, status = 'confirmed') => {
+      db._set(['appt', 'days', 'arakron', '2026-10-05', id], { s, e: s + 30, ps: s, pe: s + 45, k: 'b' });
+      db._set(['appt', 'bookings', 'arakron', id], { service: 'intro', date: '2026-10-05', time: '', s, e: s + 30, mode: 'phone', name: 'Τ', email: id + '@example.com', phone: '6900000000', lang: 'el', status, token: 'tok' + id, created });
+    };
+    const longAgo = Date.now() - 3 * 864e5;
+    put('rem1', 9 * 60 + 30, longAgo);                  // σε 90' -> υπενθύμιση
+    put('rem2', 11 * 60, longAgo);                      // σε 180' -> όχι ακόμα
+    put('rem3', 9 * 60 + 45, Date.now() - 10 * 60000);  // έκλεισε πριν 10' -> όχι
+    put('rem4', 9 * 60, longAgo, 'cancelled');          // ακυρωμένο -> όχι
+    global.__APPT_SENT__ = [];
+    const r1 = await require('../netlify/functions/appt-reminders').run();
+    assert.deepEqual(r1, { sent: 1, skipped: 1 });
+    assert.equal(global.__APPT_SENT__[0].to, 'rem1@example.com');
+    assert(global.__APPT_SENT__[0].subject.startsWith('Υπενθύμιση ραντεβού'));
+    assert(global.__APPT_SENT__[0].html.includes('cancel.html'), 'με link ακύρωσης');
+    const r2 = await require('../netlify/functions/appt-reminders').run();
+    assert.deepEqual(r2, { sent: 0, skipped: 0 }, 'καμία διπλή');
+
+    // Κλειστές υπενθυμίσεις από τις Ρυθμίσεις
+    const K = { b: 'arakron', key: 'test-admin-key-123456' };
+    const st = (await call('appt-admin', { ...K, action: 'settings' })).body.settings;
+    assert.equal(st.remindHours, 2);
+    await call('appt-admin', { ...K, action: 'saveSettings', settings: { ...st, remindHours: 0 } });
+    db._set(['appt', 'bookings', 'arakron', 'rem2', 'remindedAt'], null);
+    Date.now = () => FIXED + 70 * 60000;                // 09:10: το rem2 είναι σε 110'
+    assert.equal((await require('../netlify/functions/appt-reminders').run()).sent, 0);
+    await call('appt-admin', { ...K, action: 'saveSettings', settings: { ...st, remindHours: 2 } });
+    assert.equal((await require('../netlify/functions/appt-reminders').run()).sent, 1);
+    Date.now = () => FIXED;
+    delete db.data.appt.settings;
+
+    // Αντίγραφο ασφαλείας
+    global.__APPT_SENT__ = [];
+    const b = await require('../netlify/functions/appt-backup').run();
+    assert(b.bookings > 10 && b.bytes > 100);
+    const m = global.__APPT_SENT__[0];
+    assert.equal(m.to, 'info@arakronservices.gr'); assert.equal(m.attachments.length, 1);
+    const back = JSON.parse(require('zlib').gunzipSync(Buffer.from(m.attachments[0].content, 'base64')));
+    assert(back.appt.bookings.arakron.rem1 && !back.appt.rate, 'χωρίς τα όρια ανά IP');
+    const sb = await call('appt-super', { key: 'test-super-key-1234567890', action: 'backup' });
+    assert.equal(sb.code, 200); assert(sb.body.appt.bookings);
+  });
+
   console.log(`\nΌλες οι δοκιμές πέρασαν (${ok}).`);
 })().catch(e => { console.error('✗', e.message); process.exit(1); });
