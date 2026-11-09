@@ -20,7 +20,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geologica:wght@300..700&family=Piazzolla:ital,opsz,wght@1,8..30,400;1,8..30,500&display=swap">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"Ραντεβού online","applicationCategory":"BusinessApplication","operatingSystem":"Web","inLanguage":"el",
- "offers":[{"@type":"Offer","price":"12","priceCurrency":"EUR","description":"Μηνιαία συνδρομή"},{"@type":"Offer","price":"99","priceCurrency":"EUR","description":"Ετήσια συνδρομή"}],
+ "offers":[{"@type":"Offer","price":"12","priceCurrency":"EUR","description":"Μηνιαία συνδρομή, 1 άτομο"},{"@type":"Offer","price":"99","priceCurrency":"EUR","description":"Ετήσια συνδρομή, 1 άτομο"},{"@type":"Offer","price":"25","priceCurrency":"EUR","description":"Μηνιαία συνδρομή ομάδας, έως 5 άτομα"},{"@type":"Offer","price":"199","priceCurrency":"EUR","description":"Ετήσια συνδρομή ομάδας, έως 5 άτομα"}],
  "provider":{"@type":"Organization","name":"AR Akron Services","url":"https://www.arakronservices.gr/"}}
 </script>
 <style>
@@ -118,7 +118,9 @@
   .incl span{color:var(--ink-2)}
 
   /* Τιμή */
-  .price{display:grid;grid-template-columns:auto auto 1fr;gap:0 56px;align-items:end;max-width:1000px}
+  .plan{font-weight:560;font-size:1.05rem;margin:0 0 18px;color:var(--ink-2)}
+  .price + .plan{margin-top:56px}
+  .price{display:grid;grid-template-columns:200px 300px 1fr;gap:0 48px;align-items:end;max-width:1000px}
   .amt{font-weight:300;font-size:clamp(3.6rem,8vw,6rem);line-height:.9;letter-spacing:-.05em}
   .amt sup{font-size:.4em;font-weight:500;vertical-align:.95em;margin-right:4px;letter-spacing:0}
   .per{display:block;font-size:1rem;color:var(--ink-2);margin-top:10px;letter-spacing:0}
@@ -169,7 +171,7 @@
     .agenda{transform:none}
     .steps{grid-template-columns:1fr 1fr;gap:36px 0}
     .steps li:nth-child(2)::after{display:none}
-    .price{grid-template-columns:auto auto;gap:28px 40px}
+    .price{grid-template-columns:auto auto;gap:28px 40px;justify-content:start}
     .terms{grid-column:1 / -1}
     .form-wrap{grid-template-columns:1fr;gap:36px}
   }
@@ -274,14 +276,17 @@
         <li><b>Χρόνος ανάμεσα στα ραντεβού.</b> <span>Για προετοιμασία, καθάρισμα ή μετακίνηση.</span></li>
         <li><b>Επιβεβαίωση από εσάς, αν θέλετε.</b> <span>Για υπηρεσίες που θέλετε να εγκρίνετε πρώτα.</span></li>
         <li><b>Ελληνικά και αγγλικά.</b> <span>Ο πελάτης διαλέγει γλώσσα.</span></li>
+        <li><b>Πολλά άτομα, ένα σύστημα.</b> <span>Κάθε άτομο με το δικό του ωράριο και τις υπηρεσίες του. Ο πελάτης διαλέγει με ποιον, ή «οποιονδήποτε».</span></li>
+        <li><b>Κρατήσεις από Google, μετρημένες.</b> <span>Βλέπετε πόσα ραντεβού ήρθαν από το κουμπί του Google.</span></li>
       </ul>
     </div>
   </section>
 
   <section class="band" id="timi">
     <div class="wrap">
-      <h2>Μία τιμή, χωρίς εκπλήξεις</h2>
+      <h2>Απλές τιμές, χωρίς εκπλήξεις</h2>
       <p class="intro">Χωρίς προμήθεια ανά ραντεβού και χωρίς δέσμευση. Το στήσιμο είναι δωρεάν.</p>
+      <h3 class="plan">Για έναν επαγγελματία</h3>
       <div class="price">
         <div class="amt"><sup>€</sup>12<span class="per">τον μήνα</span></div>
         <div class="amt year"><sup>€</sup>99<span class="per">τον χρόνο, <b>δηλαδή €8,25 τον μήνα</b></span></div>
@@ -291,8 +296,18 @@
           <li>Σταματάτε όποτε θέλετε</li>
         </ul>
       </div>
-      <p class="founder"><b>Ιδρυτική τιμή:</b> οι πρώτοι 10 επαγγελματίες κρατάνε αυτή την τιμή για όσο μένει ενεργή η συνδρομή τους.</p>
-      <p class="note">Η τιμή αφορά έναν επαγγελματία με ένα ημερολόγιο. Αν στην επιχείρησή σας δέχονται ραντεβού περισσότερα άτομα, γράψτε το στη φόρμα και θα σας πούμε πώς γίνεται.</p>
+      <h3 class="plan">Για ομάδα έως 5 άτομα</h3>
+      <div class="price">
+        <div class="amt"><sup>€</sup>25<span class="per">τον μήνα</span></div>
+        <div class="amt year"><sup>€</sup>199<span class="per">τον χρόνο, <b>δηλαδή €16,60 τον μήνα</b></span></div>
+        <ul class="terms">
+          <li>Κάθε άτομο με δικό του ημερολόγιο</li>
+          <li>Ο πελάτης διαλέγει με ποιον</li>
+          <li>Ένας λογαριασμός διαχείρισης για όλους</li>
+        </ul>
+      </div>
+      <p class="founder"><b>Ιδρυτική τιμή:</b> οι πρώτες 10 επιχειρήσεις κρατάνε αυτές τις τιμές για όσο μένει ενεργή η συνδρομή τους.</p>
+      <p class="note">Για περισσότερα από 5 άτομα, γράψτε το στη φόρμα και θα σας κάνουμε προσφορά.</p>
     </div>
   </section>
 
