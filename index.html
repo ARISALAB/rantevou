@@ -484,6 +484,14 @@
     return 'https://calendar.google.com/calendar/render?' + p;
   }
 
+  // Η επιχείρηση έχει δικό της site; (όχι κενό και όχι η ίδια η σελίδα κράτησης)
+  function ownSite() {
+    const site = (state.cfg && state.cfg.site) || '';
+    if (!/^https?:\/\//.test(site)) return false;
+    // Η σελίδα κράτησης της ίδιας της επιχείρησης (σε όποιο domain της πλατφόρμας) δεν μετράει ως site
+    try { return new URL(site).pathname.replace(/\/$/, '') !== '/' + BIZ; } catch (e) { return false; }
+  }
+
   function showDone(status, email, staffName) {
     const pend = status === 'pending', c = state.cfg, s = state.svc;
     $('done').className = 'done' + (pend ? ' pend' : '');
@@ -499,7 +507,7 @@
       </div>
       <div class="actions">
         ${pend ? '' : `<a class="btn btn-gold" href="${gcal()}" target="_blank" rel="noopener">${t('addCal')}</a>`}
-        <a class="btn btn-ghost" href="${esc(c.site)}">${t('toSite')}</a>
+        ${ownSite() ? `<a class="btn btn-ghost" href="${esc(c.site)}">${t('toSite')}</a>` : `<a class="btn btn-ghost" href="${esc(location.pathname)}?lang=${lang}">${t('another')}</a>`}
       </div>`;
     $('form').reset();
     go(4);
@@ -526,8 +534,10 @@
       if (c.icons.png) { $('icoIco').href = c.icons.png; $('icoIco').removeAttribute('sizes'); $('icoIco').type = 'image/png'; }
       if (c.icons.apple) $('icoApple').href = c.icons.apple;
     }
-    $('logo').src = c.logo; $('brand').href = c.site;
-    $('ftName').textContent = c.name; $('ftSite').href = c.site; $('ftSite').textContent = c.site.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    $('logo').src = c.logo; $('brand').href = ownSite() ? c.site : location.pathname;
+    $('ftName').textContent = c.name;
+    if (ownSite()) { $('ftSite').href = c.site; $('ftSite').textContent = c.site.replace(/^https?:\/\//, '').replace(/\/$/, ''); }
+    else $('ftSite').hidden = true;
     applyLang();
     // ?service=... ανοίγει κατευθείαν το ημερολόγιο της υπηρεσίας (π.χ. κουμπιά στο site).
     // Από το κουμπί κράτησης του Google ο πελάτης βλέπει πρώτα όλες τις υπηρεσίες.
