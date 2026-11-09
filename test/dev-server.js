@@ -15,7 +15,7 @@ global.__APPT_SENT__ = [];
 process.env.ADMIN_KEY_ARAKRON = process.env.ADMIN_KEY_ARAKRON || 'dev-admin-key-123456';
 
 const ROOT = path.join(__dirname, '..');
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.txt': 'text/plain', '.xml': 'application/xml' };
 
 http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
@@ -33,7 +33,8 @@ http.createServer(async (req, res) => {
   if (url.pathname === '/__sent') { res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(global.__APPT_SENT__)); return; }
   let p = path.join(ROOT, decodeURIComponent(url.pathname));
   if (!p.startsWith(ROOT)) { res.writeHead(403); return res.end(); }
-  if (url.pathname === '/' || (!fs.existsSync(p) && !path.extname(p))) p = path.join(ROOT, 'index.html');
+  if (url.pathname === '/') p = path.join(ROOT, 'landing.html');
+  else if (!fs.existsSync(p) && !path.extname(p)) p = path.join(ROOT, 'index.html');
   if (!fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end('404'); }
   res.writeHead(200, { 'Content-Type': TYPES[path.extname(p)] || 'application/octet-stream' });
   fs.createReadStream(p).pipe(res);

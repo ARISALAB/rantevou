@@ -137,9 +137,11 @@ async function toOwner(kind, biz, svc, b) {
   const gold = (biz.theme && biz.theme.accent) || '#c9a24a';
   const status = b.status === 'pending' ? ' (θέλει επιβεβαίωση)' : '';
   const head = kind === 'new' ? `Νέο ραντεβού${status}` : 'Ο πελάτης ακύρωσε ραντεβού';
+  const src = b.source === 'google' ? 'Google (κουμπί κράτησης)' : b.source ? b.source : '';
   const contact = `<p style="margin:0;font-size:15px;line-height:1.6"><b>${esc(b.name)}</b>${b.company ? ' · ' + esc(b.company) : ''}<br>
 <a href="tel:${esc(b.phone)}">${esc(b.phone)}</a> · <a href="mailto:${esc(b.email)}">${esc(b.email)}</a></p>
-${b.notes ? `<p style="margin:14px 0 0;padding:12px;background:#faf8f4;border-radius:8px;font-size:14px">${esc(b.notes)}</p>` : ''}`;
+${b.notes ? `<p style="margin:14px 0 0;padding:12px;background:#faf8f4;border-radius:8px;font-size:14px">${esc(b.notes)}</p>` : ''}
+${src ? `<p style="margin:14px 0 0;font-size:13px;color:#777">Ήρθε από: <b>${esc(src)}</b></p>` : ''}`;
   const inner = `<p style="margin:0 0 4px;font-size:18px;font-weight:bold">${head}</p>
 ${detailsTable(biz, svc, b, 'el', true)}${contact}
 <p style="margin-top:22px">${btn(`${siteUrl()}/admin.html?b=${biz.id}`, 'Άνοιγμα διαχείρισης', gold)}</p>`;
@@ -154,4 +156,22 @@ ${detailsTable(biz, svc, b, 'el', true)}${contact}
   return send(msg);
 }
 
-module.exports = { toCustomer, toOwner, niceDate, calendarLink };
+// Νέο αίτημα από τη landing page («Θέλω το σύστημα») προς τον διαχειριστή της πλατφόρμας
+async function leadToPlatform(to, lead) {
+  const platform = { name: 'Ραντεβού · AR Akron Services', phone: '', site: siteUrl(), theme: { accent: '#c9a24a' } };
+  const row = (k, v) => v ? `<tr><td style="padding:6px 12px 6px 0;color:#777;vertical-align:top;white-space:nowrap">${k}</td><td style="padding:6px 0;font-weight:bold">${esc(v)}</td></tr>` : '';
+  const inner = `<p style="margin:0 0 4px;font-size:18px;font-weight:bold">Νέο αίτημα για το σύστημα ραντεβού</p>
+<table cellpadding="0" cellspacing="0" style="margin:18px 0;font-size:15px">
+${row('Όνομα', lead.name)}${row('Επιχείρηση', lead.business)}${row('Επάγγελμα', lead.profession)}
+${row('Άτομα που δέχονται ραντεβού', lead.staff)}${row('Πόλη', lead.city)}${row('Τηλέφωνο', lead.phone)}${row('Email', lead.email)}
+</table>
+${lead.message ? `<p style="margin:0;padding:12px;background:#faf8f4;border-radius:8px;font-size:14px;white-space:pre-wrap">${esc(lead.message)}</p>` : ''}
+<p style="margin:18px 0 0;font-size:13px;color:#777">Απαντήστε σε αυτό το email για να γράψετε κατευθείαν στον ενδιαφερόμενο.</p>`;
+  return send({
+    from: `"Ραντεβού · AR Akron" <${senderAddress()}>`, to, reply_to: lead.email,
+    subject: `✨ Νέο αίτημα: ${lead.business || lead.name}${lead.profession ? ' · ' + lead.profession : ''}`,
+    html: shell(platform, inner),
+  });
+}
+
+module.exports = { toCustomer, toOwner, leadToPlatform, niceDate, calendarLink };

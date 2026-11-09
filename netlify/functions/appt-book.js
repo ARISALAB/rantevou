@@ -26,6 +26,9 @@ exports.handler = async (event) => {
   const company = str(b.company, 120), address = str(b.address, 200), notes = str(b.notes, 1500);
   const extra = str(b.extra, 60);
   const lang = b.lang === 'en' ? 'en' : 'el';
+  // Πηγή κράτησης: "google" από το κουμπί του Google, αλλιώς το utm_source (π.χ. "instagram")
+  const source = /^[a-z0-9_.-]{1,30}$/.test(String(b.source || '')) ? b.source : '';
+  const rwg = /^[A-Za-z0-9_\-=.]{1,500}$/.test(String(b.rwg || '')) ? b.rwg : '';
 
   if (!svc || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time) ||
       !svc.modes.includes(mode) || !name || phone.replace(/\D/g, '').length < 8 || !EMAIL_RE.test(email) ||
@@ -49,6 +52,7 @@ exports.handler = async (event) => {
       service: svc.id, date, time, s: span.s, e: span.e, mode,
       name, phone, email, company, address: mode === 'onsite' ? address : '', extra: svc.extra ? extra : '', notes,
       lang, status: svc.approval ? 'pending' : 'confirmed', token: newToken(), created: Date.now(), consent: true,
+      source, ...(rwg ? { rwg } : {}),
     };
     try {
       await bookingRef(db, biz.id, id).set(booking);

@@ -99,6 +99,7 @@ const t = async (label, f) => { await f(); ok++; console.log('✓', label); };
     assert.equal(cust.to, 'g@example.com'); assert(cust.attachments && cust.attachments.length === 1, 'ics');
     assert(cust.html.includes('calendar.google.com'));
     assert.equal(own.to, 'info@arakronservices.gr');
+    assert(!own.html.includes('Ήρθε από'), 'χωρίς πηγή, καμία γραμμή');
     assert.equal(cust.from, '"AR Akron Services" <noreply@tablereserve.gr>');
     assert(!own.html.includes('<script>'), 'escape HTML');
   });
@@ -211,6 +212,41 @@ const t = async (label, f) => { await f(); ok++; console.log('✓', label); };
     const a2 = await call('appt-availability', { b: 'arakron', service: 'intro' });
     assert(!a2.body.days['2026-10-11'], 'Κυριακή κλειστή');
     delete db.data.appt.settings;
+  });
+
+  await t('πηγή κράτησης: Google με rwg_token, εμφανίζεται στο admin χωρίς το token', async () => {
+    global.__APPT_SENT__ = [];
+    const r = await call('appt-book', { ...base, service: 'intro', date: '2026-10-13', time: '09:00', mode: 'phone', source: 'google', rwg: 'AJKvS9W-abc_123=' }, ip(30));
+    assert.equal(r.code, 200, JSON.stringify(r.body));
+    const db = global.__APPT_TEST_DB__;
+    const saved = db.data.appt.bookings.arakron[r.body.id];
+    assert.equal(saved.source, 'google'); assert.equal(saved.rwg, 'AJKvS9W-abc_123=');
+    assert(global.__APPT_SENT__[1].html.includes('Google (κουμπί κράτησης)'));
+    const bad = await call('appt-book', { ...base, service: 'intro', date: '2026-10-13', time: '10:00', mode: 'phone', source: '<script>', rwg: 'x y' }, ip(31));
+    const s2 = db.data.appt.bookings.arakron[bad.body.id];
+    assert.equal(s2.source, ''); assert(!('rwg' in s2));
+    const list = await call('appt-admin', { b: 'arakron', key: 'test-admin-key-123456', action: 'list' });
+    const it = list.body.bookings.find(b => b.id === r.body.id);
+    assert.equal(it.source, 'google'); assert(!('rwg' in it) && !('token' in it));
+  });
+
+  await t('αίτημα «Θέλω το σύστημα»: έλεγχοι, αποθήκευση, email, όριο', async () => {
+    const L = { name: 'Μαρία Κ.', business: 'Κομμωτήριο Μαρία', profession: 'Κομμωτήριο', staff: '2-5', city: 'Αθήνα', phone: '6900000001', email: 'm@example.com', message: 'Θέλω <b>ραντεβού</b>', consent: true };
+    assert.equal((await call('appt-lead', { ...L, email: 'x' }, ip(40))).code, 400);
+    assert.equal((await call('appt-lead', { ...L, consent: false }, ip(40))).code, 400);
+    global.__APPT_SENT__ = [];
+    const r = await call('appt-lead', L, ip(41));
+    assert.equal(r.code, 200, JSON.stringify(r.body));
+    const leads = Object.values(global.__APPT_TEST_DB__.data.appt.leads);
+    assert.equal(leads.length, 1); assert.equal(leads[0].business, 'Κομμωτήριο Μαρία'); assert.equal(leads[0].staff, '2-5');
+    const m = global.__APPT_SENT__[0];
+    assert.equal(m.to, 'info@arakronservices.gr'); assert.equal(m.reply_to, 'm@example.com');
+    assert(!m.html.includes('<b>ραντεβού</b>'), 'escape');
+    assert.equal((await call('appt-lead', { ...L, website: 'bot' }, ip(42))).code, 200);
+    assert.equal(Object.keys(global.__APPT_TEST_DB__.data.appt.leads).length, 1, 'το bot δεν αποθηκεύεται');
+    const codes = [];
+    for (let i = 0; i < 3; i++) codes.push((await call('appt-lead', L, ip(41))).code);
+    assert.deepEqual(codes, [200, 200, 429]);
   });
 
   console.log(`\nΌλες οι δοκιμές πέρασαν (${ok}).`);

@@ -35,12 +35,13 @@ exports.handler = async (event) => {
   try {
     switch (body.action) {
       case 'list': {
-        const from = addDays(now.date, -14);
+        const from = addDays(now.date, -45);
         const all = (await db.ref(`appt/bookings/${biz.id}`).get()).val() || {};
         const bookings = Object.entries(all)
           .filter(([, b]) => b && b.date >= from)
           .map(([id, b]) => {
-            const { token, ...rest } = b;
+            const { token, rwg, ...rest } = b;
+            void rwg;
             return { id, ...rest, end: fromMin(b.e) };
           })
           .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));

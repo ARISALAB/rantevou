@@ -203,6 +203,17 @@
   // Η επιχείρηση: /arakron  ή  /index.html?b=arakron
   const seg = location.pathname.split('/').filter(Boolean)[0] || '';
   const BIZ = (seg && !/\.html$/.test(seg) ? seg : qs.get('b') || 'arakron').toLowerCase();
+  // Από πού ήρθε ο πελάτης (π.χ. κουμπί κράτησης του Google). Κρατιέται για όλη την επίσκεψη.
+  const SRC = (() => {
+    const K = 'appt_src_' + BIZ;
+    let saved = {}; try { saved = JSON.parse(sessionStorage.getItem(K) || '{}'); } catch (e) {}
+    const rwg = qs.get('rwg_token') || '';
+    const utm = (qs.get('utm_source') || '').toLowerCase();
+    const cur = rwg || utm === 'google' ? { source: 'google', rwg } : utm ? { source: utm } : null;
+    const out = cur || saved;
+    try { if (cur) sessionStorage.setItem(K, JSON.stringify(cur)); } catch (e) {}
+    return { source: out.source || '', rwg: out.rwg || '' };
+  })();
 
   const T = {
     el: {
@@ -399,7 +410,7 @@
       b: BIZ, service: s.id, date: state.date, time: state.time, mode: state.mode,
       name: v('name'), company: v('company'), phone: v('phone'), email: v('email'),
       address: v('address'), extra: v('extra'), notes: v('notes'), website: v('website'),
-      consent: f.consent.checked, lang,
+      consent: f.consent.checked, lang, source: SRC.source, rwg: SRC.rwg,
     });
     btn.disabled = false; setupForm();
     if (r.ok) return showDone(r.data.status, v('email'));

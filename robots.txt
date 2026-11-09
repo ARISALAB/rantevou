@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin.html
+Disallow: /cancel.html
+Allow: /
+
+Sitemap: https://rantevou.arakronservices.gr/sitemap.xml

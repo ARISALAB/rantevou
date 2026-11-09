@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Online ραντεβού για επαγγελματίες · AR Akron Services</title>
+<meta name="description" content="Οι πελάτες σας κλείνουν ώρα μόνοι τους, από τη σελίδα σας, το Instagram και το κουμπί κράτησης στο Google. Το στήνουμε εμείς για εσάς. €12 τον μήνα, χωρίς προμήθεια.">
+<link rel="canonical" href="https://rantevou.arakronservices.gr/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Οι πελάτες σας κλείνουν ώρα μόνοι τους">
+<meta property="og:description" content="Online ραντεβού για επαγγελματίες, μαζί με το κουμπί κράτησης στο Google. Το στήνουμε εμείς για εσάς.">
+<meta property="og:url" content="https://rantevou.arakronservices.gr/">
+<meta property="og:locale" content="el_GR">
+<meta name="theme-color" content="#ECEFF3">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geologica:wght@300..700&family=Piazzolla:ital,opsz,wght@1,8..30,400;1,8..30,500&display=swap">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Ραντεβού online","applicationCategory":"BusinessApplication","operatingSystem":"Web","inLanguage":"el",
+ "offers":[{"@type":"Offer","price":"12","priceCurrency":"EUR","description":"Μηνιαία συνδρομή"},{"@type":"Offer","price":"99","priceCurrency":"EUR","description":"Ετήσια συνδρομή"}],
+ "provider":{"@type":"Organization","name":"AR Akron Services","url":"https://www.arakronservices.gr/"}}
+</script>
+<style>
+  :root{
+    --paper:#ECEFF3; --sheet:#F7F8FA; --rule:#CBD4DF; --ink:#161B33; --ink-2:#4A5170;
+    --pen:#2A3DD1; --pen-dark:#1E2DA6; --marker:#F2DF3A; --margin:#D94A4A;
+    --sans:"Geologica",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --hand:"Piazzolla",Georgia,serif;
+    --line:32px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+  a{color:var(--pen)}
+  :focus-visible{outline:3px solid var(--pen);outline-offset:3px;border-radius:4px}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+
+  /* Κεφαλίδα */
+  .top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0}
+  .mark{font-weight:650;font-size:1.15rem;letter-spacing:-.02em;color:var(--ink);text-decoration:none;display:inline-flex;align-items:baseline;gap:8px}
+  .mark span{background:linear-gradient(transparent 55%,var(--marker) 55%,var(--marker) 92%,transparent 92%);padding:0 2px}
+  .mark small{font-weight:400;font-size:.82rem;color:var(--ink-2)}
+  .top nav{display:flex;gap:22px;font-size:.95rem}
+  .top nav a{color:var(--ink);text-decoration:none}
+  .top nav a:hover{color:var(--pen)}
+
+  /* Hero */
+  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;padding:40px 0 88px}
+  h1{font-weight:640;font-size:clamp(2.4rem,5.4vw,4.3rem);line-height:1.02;letter-spacing:-.035em;margin:0 0 24px;max-width:12ch}
+  .lead{font-size:1.2rem;line-height:1.55;color:var(--ink-2);max-width:34ch;margin:0 0 34px;font-weight:350}
+  .ctas{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:500 1rem/1 var(--sans);padding:17px 26px;border-radius:999px;text-decoration:none;cursor:pointer;border:0;transition:background .15s}
+  .btn.pen{background:var(--pen);color:#fff}
+  .btn.pen:hover{background:var(--pen-dark)}
+  .btn.plain{color:var(--ink);padding:17px 6px;text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:6px;text-decoration-thickness:2px}
+  .btn.plain:hover{text-decoration-color:var(--pen)}
+
+  /* Η ατζέντα */
+  .agenda{position:relative;background:var(--sheet);border-radius:6px 18px 18px 6px;box-shadow:0 1px 0 var(--rule),0 30px 60px -30px rgba(22,27,51,.35);padding:22px 26px 26px 78px;
+    background-image:linear-gradient(var(--sheet) calc(var(--line) * 2 - 1.5px),var(--rule) calc(var(--line) * 2 - 1.5px));background-size:100% calc(var(--line) * 2);background-position:0 22px;transform:rotate(1.2deg)}
+  .agenda::before{content:"";position:absolute;top:0;bottom:0;left:62px;width:2px;background:var(--margin);opacity:.75}
+  .ag-head{display:flex;justify-content:space-between;align-items:baseline;height:var(--line);margin-bottom:var(--line)}
+  .ag-day{font-weight:620;font-size:1.25rem;letter-spacing:-.02em}
+  .ag-who{font-size:.85rem;color:var(--ink-2)}
+  .slot{display:grid;grid-template-columns:44px 1fr auto;column-gap:24px;align-items:end;padding-bottom:9px;height:calc(var(--line) * 2);margin-left:-66px;position:relative}
+  .slot time{text-align:right}
+  .slot time{font-size:.85rem;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .slot .entry{justify-self:start;line-height:1.15}
+  .slot .nm{font-family:var(--hand);font-style:italic;font-size:1.25rem;color:var(--pen-dark);padding:0 7px;margin-left:-7px;
+    background:linear-gradient(100deg,transparent 0,var(--marker) 3%,var(--marker) 96%,transparent 100%) no-repeat 0 70%/var(--hl,100%) 70%;transition:background-size .6s cubic-bezier(.6,.1,.3,1),color .3s}
+  .slot .entry small{display:block;font-family:var(--sans);font-style:normal;font-size:.78rem;color:var(--ink-2);margin-top:3px}
+  .slot time,.slot .src{padding-bottom:2px}
+  .slot .src{font-size:.75rem;color:var(--ink-2);white-space:nowrap;padding-left:10px}
+  .slot .src b{font-weight:550;color:var(--ink)}
+  .slot.pending .nm{--hl:0%;color:transparent}
+  .slot.pending .entry small,.slot.pending .src{opacity:0}
+  .slot .entry small,.slot .src{transition:opacity .4s .35s}
+  .slot.free .entry{color:#9AA6B6;font-size:.9rem}
+  .jobs{display:flex;flex-wrap:wrap;gap:8px;margin:26px 0 0 4px}
+  .jobs button{font:450 .9rem/1 var(--sans);color:var(--ink-2);background:transparent;border:1.5px solid var(--rule);border-radius:999px;padding:9px 15px;cursor:pointer}
+  .jobs button:hover{border-color:var(--ink-2)}
+  .jobs button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+  .jobs-note{font-size:.85rem;color:var(--ink-2);margin:10px 0 0 4px}
+
+  /* Ενότητες */
+  section.band{padding:96px 0;border-top:1.5px solid var(--rule)}
+  h2{font-weight:620;font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.1;letter-spacing:-.03em;margin:0 0 18px;max-width:20ch}
+  .intro{color:var(--ink-2);max-width:56ch;margin:0 0 48px;font-size:1.08rem}
+
+  /* Πριν / Τώρα */
+  .swap{display:grid;grid-template-columns:1fr 1fr;max-width:980px}
+  .swap > div{padding:20px 28px 20px 0;border-bottom:1.5px solid var(--rule);font-size:1.05rem}
+  .swap > div:nth-child(odd){color:var(--ink-2);text-decoration:line-through;text-decoration-color:var(--margin);text-decoration-thickness:1.5px}
+  .swap > div:nth-child(even){padding-left:28px;border-left:2px solid var(--margin)}
+  .swap .h{font-size:.9rem;color:var(--ink-2);text-decoration:none!important;padding-top:0}
+
+  /* Βήματα */
+  .steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:0;counter-reset:s;max-width:1060px}
+  .steps li{counter-increment:s;padding:0 26px 0 0;position:relative}
+  .steps li::before{content:counter(s);display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:2px solid var(--pen);color:var(--pen);font-weight:600;margin-bottom:18px;background:var(--paper);position:relative;z-index:1}
+  .steps li:not(:last-child)::after{content:"";position:absolute;top:22px;left:44px;right:0;border-top:2px dashed var(--rule)}
+  .steps b{display:block;font-weight:580;margin-bottom:6px;font-size:1.05rem}
+  .steps p{margin:0;color:var(--ink-2);font-size:.97rem}
+
+  /* Περιλαμβάνει */
+  .incl{columns:2;column-gap:56px;max-width:900px;margin:0;padding:0;list-style:none}
+  .incl li{break-inside:avoid;padding:14px 0 14px 34px;position:relative;border-bottom:1.5px solid var(--rule)}
+  .incl li::before{content:"";position:absolute;left:4px;top:22px;width:14px;height:8px;border-left:2.5px solid var(--pen);border-bottom:2.5px solid var(--pen);transform:rotate(-45deg)}
+  .incl b{font-weight:560}
+  .incl span{color:var(--ink-2)}
+
+  /* Τιμή */
+  .price{display:grid;grid-template-columns:auto auto 1fr;gap:0 56px;align-items:end;max-width:1000px}
+  .amt{font-weight:300;font-size:clamp(3.6rem,8vw,6rem);line-height:.9;letter-spacing:-.05em}
+  .amt sup{font-size:.4em;font-weight:500;vertical-align:.95em;margin-right:4px;letter-spacing:0}
+  .per{display:block;font-size:1rem;color:var(--ink-2);margin-top:10px;letter-spacing:0}
+  .amt.year{color:var(--pen)}
+  .amt.year .per b{color:var(--ink);font-weight:550}
+  .terms{margin:0;padding:0;list-style:none;font-size:1rem;align-self:center}
+  .terms li{padding:6px 0}
+  .founder{margin-top:44px;max-width:60ch;padding:18px 22px;background:var(--marker);border-radius:4px 14px 14px 4px;font-size:1rem}
+  .note{margin-top:18px;color:var(--ink-2);font-size:.95rem;max-width:60ch}
+
+  /* Φόρμα */
+  .form-wrap{display:grid;grid-template-columns:.8fr 1.2fr;gap:64px;align-items:start}
+  .who{font-size:1rem;color:var(--ink-2)}
+  .who h2{color:var(--ink)}
+  .who p{margin:0 0 14px}
+  .who a{font-weight:500}
+  form{background:var(--sheet);border-radius:18px;padding:34px;box-shadow:0 30px 60px -40px rgba(22,27,51,.35)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .f{display:flex;flex-direction:column;gap:7px;min-width:0}
+  .f.full{grid-column:1 / -1}
+  .f label,.f legend{font-size:.9rem;font-weight:500}
+  .f input,.f select,.f textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1.5px solid transparent;border-radius:10px;padding:13px 14px;width:100%}
+  .f textarea{min-height:96px;resize:vertical}
+  .f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:var(--pen);background:#fff}
+  fieldset.f{border:0;padding:0;margin:0}
+  .seg{display:flex;gap:8px;flex-wrap:wrap}
+  .seg label{position:relative}
+  .seg input{position:absolute;opacity:0;pointer-events:none}
+  .seg span{display:inline-block;padding:11px 18px;border-radius:999px;border:1.5px solid var(--rule);font-size:.95rem;font-weight:400;cursor:pointer;background:var(--sheet)}
+  .seg input:checked + span{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .seg input:focus-visible + span{outline:3px solid var(--pen);outline-offset:2px}
+  .consent{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;color:var(--ink-2);margin:22px 0}
+  .consent input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--pen);flex:none}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .ferr{color:var(--margin);font-size:.95rem;min-height:1.4em;margin:12px 0 0}
+  .done{display:none;padding:10px 0}
+  .done h3{font-weight:620;font-size:1.6rem;letter-spacing:-.02em;margin:0 0 10px}
+  .done p{margin:0;color:var(--ink-2)}
+  form.sent .fields{display:none}
+  form.sent .done{display:block}
+
+  footer{border-top:1.5px solid var(--rule);padding:40px 0 56px;font-size:.92rem;color:var(--ink-2)}
+  footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:20px}
+  footer p{margin:0 0 6px}
+
+  @media (max-width:900px){
+    .hero{grid-template-columns:1fr;gap:48px;padding-top:32px}
+    .agenda{transform:none}
+    .steps{grid-template-columns:1fr 1fr;gap:36px 0}
+    .steps li:nth-child(2)::after{display:none}
+    .price{grid-template-columns:auto auto;gap:28px 40px}
+    .terms{grid-column:1 / -1}
+    .form-wrap{grid-template-columns:1fr;gap:36px}
+  }
+  @media (max-width:620px){
+    body{font-size:16px}
+    .wrap{padding:0 18px}
+    .top nav a:not(.go){display:none}
+    .top nav a{white-space:nowrap}
+    .mark small{display:none}
+    .agenda{padding:18px 16px 22px 58px}
+    .agenda::before{left:46px}
+    .slot{grid-template-columns:34px 1fr auto;column-gap:16px;margin-left:-50px}
+    .slot time{font-size:.75rem}
+    .slot .src{font-size:.7rem;padding-left:6px}
+    .slot .src b{display:block}
+    .swap{grid-template-columns:1fr}
+    .swap > div:nth-child(even){padding-left:16px;border-bottom-width:1.5px}
+    .swap > div:nth-child(odd){border-bottom:0;padding-bottom:4px}
+    .swap .h:nth-child(2){display:none}
+    .steps{grid-template-columns:1fr}
+    .steps li::after{display:none}
+    .incl{columns:1}
+    .grid{grid-template-columns:1fr}
+    form{padding:24px 18px}
+    section.band{padding:72px 0}
+  }
+</style>
+</head>
+<body>
+
+<header class="wrap top">
+  <a class="mark" href="/"><span>ραντεβού</span><small>από την AR Akron Services</small></a>
+  <nav aria-label="Κύρια">
+    <a href="#pos">Πώς ξεκινάμε</a>
+    <a href="#timi">Τιμή</a>
+    <a class="go" href="#thelo">Θέλω το σύστημα</a>
+  </nav>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div>
+      <h1>Οι πελάτες σας κλείνουν ώρα μόνοι τους.</h1>
+      <p class="lead">Από τη δική σας σελίδα κράτησης, το Instagram και το κουμπί «Κράτηση» στο Google. Ακόμα κι όταν είστε με πελάτη και δεν μπορείτε να σηκώσετε τηλέφωνο.</p>
+      <div class="ctas">
+        <a class="btn pen" href="#thelo">Θέλω το σύστημα</a>
+        <a class="btn plain" href="/arakron" target="_blank" rel="noopener">Δείτε μια σελίδα κράτησης</a>
+      </div>
+    </div>
+
+    <div>
+      <div class="agenda" id="agenda" aria-live="polite">
+        <div class="ag-head"><span class="ag-day">Τρίτη 17</span><span class="ag-who" id="agWho">Κομμωτήριο</span></div>
+        <div id="slots"></div>
+      </div>
+      <div class="jobs" role="group" aria-label="Παράδειγμα για επάγγελμα" id="jobs"></div>
+      <p class="jobs-note">Ένα παράδειγμα ημέρας. Κάθε ραντεβού το έκλεισε ο ίδιος ο πελάτης.</p>
+    </div>
+  </div>
+
+  <section class="band">
+    <div class="wrap">
+      <h2>Λιγότερα τηλέφωνα, περισσότερη δουλειά</h2>
+      <p class="intro">Το ραντεβού κλείνει χωρίς εσάς. Εσείς βλέπετε τι κλείστηκε, από το κινητό, όποτε θέλετε.</p>
+      <div class="swap">
+        <div class="h">Μέχρι σήμερα</div><div class="h">Με το σύστημα</div>
+        <div>Το τηλέφωνο χτυπάει την ώρα που δουλεύετε.</div>
+        <div>Ο πελάτης βλέπει τις ελεύθερες ώρες και κλείνει μόνος του, και στις 11 το βράδυ.</div>
+        <div>«Πότε έχετε κενό;» στο Instagram, και μετά άλλα πέντε μηνύματα.</div>
+        <div>Ένα link στο προφίλ σας και η κουβέντα τελειώνει σε ένα λεπτό.</div>
+        <div>Ατζέντα στον πάγκο, σβησίματα και διπλοκλεισμένες ώρες.</div>
+        <div>Κάθε ώρα κλείνεται μία φορά. Δύο πελάτες δεν μπορούν να πάρουν την ίδια.</div>
+        <div>Κάποιος ψάχνει «κοντά μου» στο Google και πέφτει σε άλλον.</div>
+        <div>Το κουμπί «Κράτηση» στο προφίλ σας στο Google οδηγεί κατευθείαν στις ελεύθερες ώρες σας.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="pos">
+    <div class="wrap">
+      <h2>Το στήνουμε εμείς για εσάς</h2>
+      <p class="intro">Δεν χρειάζεται να ρυθμίσετε τίποτα μόνοι σας. Σε μία με δύο μέρες έχετε τη σελίδα σας έτοιμη.</p>
+      <ol class="steps">
+        <li><b>Συμπληρώνετε τη φόρμα</b><p>Δύο λεπτά: ποιοι είστε και τι δουλειά κάνετε.</p></li>
+        <li><b>Μιλάμε στο τηλέφωνο</b><p>Μας λέτε υπηρεσίες, διάρκειες και ωράριο. Τα περνάμε εμείς.</p></li>
+        <li><b>Μπαίνει το link παντού</b><p>Στο Google, στο Instagram, στο Facebook και στο site σας, αν έχετε.</p></li>
+        <li><b>Δέχεστε ραντεβού</b><p>Σας έρχεται email για κάθε νέο ραντεβού και τα βλέπετε όλα στο κινητό.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2>Τι περιλαμβάνει</h2>
+      <p class="intro">Για κομμωτήρια, λογιστές, γυμναστές, φροντιστήρια, ψυχολόγους, δικηγόρους και κάθε επαγγελματία που δουλεύει με ραντεβού.</p>
+      <ul class="incl">
+        <li><b>Σελίδα κράτησης με το όνομά σας.</b> <span>Οι υπηρεσίες σας, οι τιμές σας, το χρώμα σας.</span></li>
+        <li><b>Κουμπί «Κράτηση» στο Google.</b> <span>Το συνδέουμε εμείς με το προφίλ της επιχείρησής σας.</span></li>
+        <li><b>Email επιβεβαίωσης στον πελάτη.</b> <span>Με προσθήκη στο ημερολόγιό του και link ακύρωσης.</span></li>
+        <li><b>Ειδοποίηση σε εσάς.</b> <span>Για κάθε νέο ραντεβού και κάθε ακύρωση.</span></li>
+        <li><b>Ωράριο με διαλείμματα.</b> <span>Κλείνετε μέρες ή ώρες για άδεια με ένα πάτημα.</span></li>
+        <li><b>Χρόνος ανάμεσα στα ραντεβού.</b> <span>Για προετοιμασία, καθάρισμα ή μετακίνηση.</span></li>
+        <li><b>Επιβεβαίωση από εσάς, αν θέλετε.</b> <span>Για υπηρεσίες που θέλετε να εγκρίνετε πρώτα.</span></li>
+        <li><b>Ελληνικά και αγγλικά.</b> <span>Ο πελάτης διαλέγει γλώσσα.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="band" id="timi">
+    <div class="wrap">
+      <h2>Μία τιμή, χωρίς εκπλήξεις</h2>
+      <p class="intro">Χωρίς προμήθεια ανά ραντεβού και χωρίς δέσμευση. Το στήσιμο είναι δωρεάν.</p>
+      <div class="price">
+        <div class="amt"><sup>€</sup>12<span class="per">τον μήνα</span></div>
+        <div class="amt year"><sup>€</sup>99<span class="per">τον χρόνο, <b>δηλαδή €8,25 τον μήνα</b></span></div>
+        <ul class="terms">
+          <li>Δωρεάν στήσιμο και κουμπί στο Google</li>
+          <li>Χωρίς χρέωση ανά ραντεβού</li>
+          <li>Σταματάτε όποτε θέλετε</li>
+        </ul>
+      </div>
+      <p class="founder"><b>Ιδρυτική τιμή:</b> οι πρώτοι 10 επαγγελματίες κρατάνε αυτή την τιμή για όσο μένει ενεργή η συνδρομή τους.</p>
+      <p class="note">Η τιμή αφορά έναν επαγγελματία με ένα ημερολόγιο. Αν στην επιχείρησή σας δέχονται ραντεβού περισσότερα άτομα, γράψτε το στη φόρμα και θα σας πούμε πώς γίνεται.</p>
+    </div>
+  </section>
+
+  <section class="band" id="thelo">
+    <div class="wrap form-wrap">
+      <div class="who">
+        <h2>Θέλω το σύστημα</h2>
+        <p>Συμπληρώστε τη φόρμα και θα σας τηλεφωνήσουμε μέσα σε μία εργάσιμη για να στήσουμε μαζί τη σελίδα σας.</p>
+        <p>Προτιμάτε να μιλήσουμε τώρα; <a href="tel:+306983661460">698 366 1460</a> ή <a href="mailto:info@arakronservices.gr">info@arakronservices.gr</a></p>
+      </div>
+
+      <form id="leadForm" novalidate>
+        <div class="fields">
+          <div class="grid">
+            <div class="f"><label for="lName">Ονοματεπώνυμο</label><input id="lName" name="name" autocomplete="name" required maxlength="100"></div>
+            <div class="f"><label for="lBiz">Επιχείρηση</label><input id="lBiz" name="business" autocomplete="organization" required maxlength="120"></div>
+            <div class="f"><label for="lJob">Τι δουλειά κάνετε;</label>
+              <input id="lJob" name="profession" list="jobsList" maxlength="80" placeholder="π.χ. Κομμωτήριο">
+              <datalist id="jobsList"><option>Κομμωτήριο</option><option>Κουρείο</option><option>Αισθητική / νύχια</option><option>Λογιστικό γραφείο</option><option>Δικηγορικό γραφείο</option><option>Personal trainer / γυμναστήριο</option><option>Yoga / pilates</option><option>Φροντιστήριο / ιδιαίτερα</option><option>Ψυχολόγος</option><option>Φυσικοθεραπευτής</option><option>Διατροφολόγος</option><option>Σχολή οδηγών</option></datalist>
+            </div>
+            <div class="f"><label for="lCity">Πόλη</label><input id="lCity" name="city" autocomplete="address-level2" maxlength="80"></div>
+            <div class="f"><label for="lPhone">Τηλέφωνο</label><input id="lPhone" name="phone" type="tel" autocomplete="tel" required maxlength="30"></div>
+            <div class="f"><label for="lEmail">Email</label><input id="lEmail" name="email" type="email" autocomplete="email" required maxlength="120"></div>
+            <fieldset class="f full"><legend>Πόσα άτομα δέχονται ραντεβού;</legend>
+              <div class="seg">
+                <label><input type="radio" name="staff" value="1" checked><span>Μόνο εγώ</span></label>
+                <label><input type="radio" name="staff" value="2-5"><span>2 έως 5</span></label>
+                <label><input type="radio" name="staff" value="6+"><span>6 ή περισσότερα</span></label>
+              </div>
+            </fieldset>
+            <div class="f full"><label for="lMsg">Κάτι που θέλετε να ξέρουμε; <span style="font-weight:400;color:var(--ink-2)">(προαιρετικό)</span></label><textarea id="lMsg" name="message" maxlength="1500"></textarea></div>
+          </div>
+          <div class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+          <label class="consent"><input type="checkbox" name="consent" required><span>Συμφωνώ να επικοινωνήσει μαζί μου η AR Akron Services για το σύστημα ραντεβού, σύμφωνα με την <a href="https://www.arakronservices.gr/privacy" target="_blank" rel="noopener">πολιτική απορρήτου</a>.</span></label>
+          <button class="btn pen" type="submit" id="lSend">Στείλτε το αίτημα</button>
+          <p class="ferr" id="lErr" role="alert"></p>
+        </div>
+        <div class="done" tabindex="-1" id="lDone">
+          <h3>Το αίτημα στάλθηκε</h3>
+          <p>Θα σας τηλεφωνήσουμε μέσα σε μία εργάσιμη. Αν βιάζεστε, καλέστε μας στο <a href="tel:+306983661460">698 366 1460</a>.</p>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <p>Το σύστημα ραντεβού είναι υπηρεσία της <a href="https://www.arakronservices.gr/" target="_blank" rel="noopener">AR Akron Services</a>.</p>
+      <p>Αριστείδης Αλαμπουρινός, Γρίβα Διγενή 2, 17342 Άγιος Δημήτριος, Αττική. ΓΕΜΗ 161479309000.</p>
+    </div>
+    <div>
+      <p><a href="mailto:info@arakronservices.gr">info@arakronservices.gr</a></p>
+      <p><a href="https://www.arakronservices.gr/privacy" target="_blank" rel="noopener">Πολιτική απορρήτου</a></p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const DAYS = {
+    kommotirio: { label: 'Κομμωτήριο', slots: [
+      ['09:00', 'Ελένη Π.', 'Κούρεμα και χτένισμα', 'Google'],
+      ['10:00', 'Δήμητρα Κ.', 'Βαφή ρίζας', 'Instagram'],
+      ['11:30', null],
+      ['12:00', 'Γιάννης Μ.', 'Ανδρικό κούρεμα', 'Google'],
+      ['13:00', 'Σοφία Λ.', 'Χτένισμα', 'τη σελίδα σας'],
+    ] },
+    logistis: { label: 'Λογιστικό γραφείο', slots: [
+      ['09:30', 'Κώστας Β.', 'Έναρξη εργασιών', 'Google'],
+      ['10:30', null],
+      ['11:00', 'Μαρία Τ.', 'Φορολογική δήλωση', 'email'],
+      ['12:30', 'Ε. Νικολάου ΙΚΕ', 'Μηνιαία συνάντηση', 'Google'],
+      ['14:00', 'Πέτρος Α.', 'Πρώτη γνωριμία', 'Facebook'],
+    ] },
+    gym: { label: 'Personal trainer', slots: [
+      ['07:00', 'Αλέξης Ρ.', 'Personal training', 'Instagram'],
+      ['08:30', 'Βάσω Ν.', 'Δωρεάν γνωριμία', 'Google'],
+      ['10:00', null],
+      ['18:00', 'Θάνος Γ.', 'Personal training', 'Google'],
+      ['19:30', 'Ιωάννα Σ.', 'Πρόγραμμα διατροφής', 'Instagram'],
+    ] },
+    frontistirio: { label: 'Φροντιστήριο', slots: [
+      ['15:00', 'Ανδρέας, Β΄ Λυκείου', 'Μαθηματικά', 'Google'],
+      ['16:30', null],
+      ['17:00', 'Ζωή, Γ΄ Γυμνασίου', 'Αγγλικά', 'τη σελίδα σας'],
+      ['18:30', 'Κ. Δημητρίου', 'Ενημέρωση γονέα', 'Facebook'],
+      ['19:30', 'Μάνος, Α΄ Λυκείου', 'Φυσική', 'Google'],
+    ] },
+  };
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let timers = [];
+
+  function show(key, animate) {
+    timers.forEach(clearTimeout); timers = [];
+    const d = DAYS[key];
+    $('agWho').textContent = d.label;
+    $('slots').innerHTML = d.slots.map(([t, name, what, src]) => name
+      ? `<div class="slot${animate ? ' pending' : ''}"><time>${t}</time><span class="entry"><span class="nm">${esc(name)}</span><small>${esc(what)}</small></span><span class="src">από <b>${esc(src)}</b></span></div>`
+      : `<div class="slot free"><time>${t}</time><span class="entry">ελεύθερη ώρα</span><span></span></div>`).join('');
+    if (animate) {
+      [...$('slots').querySelectorAll('.pending')].forEach((el, i) => {
+        timers.push(setTimeout(() => el.classList.remove('pending'), 500 + i * 700));
+      });
+    }
+    $('jobs').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.k === key)));
+  }
+  $('jobs').innerHTML = Object.entries(DAYS).map(([k, d]) => `<button type="button" data-k="${k}" aria-pressed="false">${d.label}</button>`).join('');
+  $('jobs').querySelectorAll('button').forEach(b => b.onclick = () => show(b.dataset.k, false));
+  show('kommotirio', !still);
+
+  // Φόρμα «Θέλω το σύστημα»
+  const form = $('leadForm');
+  form.onsubmit = async e => {
+    e.preventDefault();
+    const v = n => (form.elements[n].value || '').trim();
+    const err = m => { $('lErr').textContent = m; };
+    err('');
+    if (!v('name') || !v('business') || !v('phone') || !v('email')) return err('Συμπληρώστε όνομα, επιχείρηση, τηλέφωνο και email.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email'))) return err('Ελέγξτε το email σας.');
+    if (v('phone').replace(/\D/g, '').length < 8) return err('Ελέγξτε το τηλέφωνό σας.');
+    if (!form.elements.consent.checked) return err('Τσεκάρετε τη συναίνεση για να σας καλέσουμε.');
+    const btn = $('lSend'); btn.disabled = true; btn.textContent = 'Αποστολή…';
+    try {
+      const r = await fetch('/.netlify/functions/appt-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+        name: v('name'), business: v('business'), profession: v('profession'), city: v('city'), phone: v('phone'), email: v('email'),
+        staff: form.elements.staff.value, message: v('message'), website: v('website'), consent: true,
+      }) });
+      if (r.status === 429) throw new Error('Στείλατε ήδη αίτημα. Θα σας καλέσουμε σύντομα.');
+      if (!r.ok) throw new Error('Το αίτημα δεν στάλθηκε. Δοκιμάστε ξανά ή καλέστε μας στο 698 366 1460.');
+      form.classList.add('sent'); $('lDone').focus();
+    } catch (x) {
+      err(x.message || 'Το αίτημα δεν στάλθηκε. Δοκιμάστε ξανά.');
+    } finally { btn.disabled = false; btn.textContent = 'Στείλτε το αίτημα'; }
+  };
+})();
+</script>
+</body>
+</html>

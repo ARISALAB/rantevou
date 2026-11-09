@@ -49,7 +49,7 @@
   .tab[aria-selected="true"]{background:var(--text);color:#111;border-color:var(--text);font-weight:600}
   .tab .n{opacity:.7;margin-left:4px}
 
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0 0}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:22px 0 0}
   .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
   .stat b{display:block;font-size:1.5rem;font-weight:500}
   .stat span{color:var(--muted);font-size:.82rem}
@@ -69,11 +69,12 @@
   .badge.pending{color:var(--warn);border-color:#5a4a26}
   .badge.confirmed{color:var(--ok);border-color:#2f5a3e}
   .badge.cancelled{color:var(--err);border-color:#5a2f2a}
+  .badge.src{color:#9ec5ff;border-color:#2a3f5a}
   @media (max-width:640px){
     .bk{grid-template-columns:60px 1fr}
     .bk .acts{grid-column:1 / -1;justify-content:flex-start;margin-top:6px}
     .bk .more,.bk .notes{grid-column:1 / -1}
-    .stats{grid-template-columns:repeat(3,1fr)}
+    .stats{grid-template-columns:repeat(2,1fr)}
   }
   .empty{color:var(--muted);padding:30px 0;text-align:center}
 
@@ -230,7 +231,8 @@
     $('stats').innerHTML = `
       <div class="stat"><b>${pending.length}</b><span>Θέλουν επιβεβαίωση</span></div>
       <div class="stat"><b>${thisWeek.length}</b><span>Τις επόμενες 7 μέρες</span></div>
-      <div class="stat"><b>${upcoming.length}</b><span>Σύνολο επόμενων</span></div>`;
+      <div class="stat"><b>${upcoming.length}</b><span>Σύνολο επόμενων</span></div>
+      <div class="stat"><b>${data.bookings.filter(b => b.source === 'google' && b.created >= Date.now() - 30 * 864e5).length}</b><span>Κρατήσεις από Google (30 μέρες)</span></div>`;
 
     const lists = {
       upcoming: { label: 'Επόμενα', items: upcoming },
@@ -252,7 +254,7 @@
         ${arr.map(b => `
           <article class="bk ${b.status}">
             <div class="tm">${esc(b.time)}<small>έως ${esc(b.end)}</small></div>
-            <div class="who"><b>${esc(svcName(b.service))}</b><span class="badge ${b.status}">${STATUS[b.status]}</span>
+            <div class="who"><b>${esc(svcName(b.service))}</b><span class="badge ${b.status}">${STATUS[b.status]}</span>${b.source === 'google' ? '<span class="badge src" title="Από το κουμπί κράτησης του Google">Google</span>' : b.source ? `<span class="badge src">${esc(b.source)}</span>` : ''}
               <div>${esc(b.name)}${b.company ? ' · ' + esc(b.company) : ''} · ${esc((data.modes[b.mode] || {}).el || b.mode)}</div></div>
             <div class="acts">
               ${b.status === 'pending' ? `<button class="btn ok" data-act="confirm" data-id="${b.id}">✓ Επιβεβαίωση</button>` : ''}
