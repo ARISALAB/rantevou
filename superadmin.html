@@ -100,6 +100,7 @@
   <span class="akron" aria-hidden="true"><img src="https://www.arakronservices.gr/favicon.svg?v=3" alt=""></span>
   <div><b>Superadmin</b><small>Πλατφόρμα ραντεβού · AR Akron Services</small></div>
   <span class="sp"></span>
+  <button class="btn" id="testBtn" type="button" hidden>Δοκιμαστικό email</button>
   <button class="btn" id="backupBtn" type="button" hidden>Λήψη αντιγράφου</button>
   <a class="btn" href="/" target="_blank" rel="noopener">Αρχική ↗</a>
   <button class="btn" id="logout" type="button" hidden>Έξοδος</button>
@@ -166,7 +167,7 @@
   function toast(m) { const el = document.createElement('div'); el.className = 'toast'; el.textContent = m; document.body.appendChild(el); setTimeout(() => el.remove(), 2400); }
   function logout(msg) {
     try { sessionStorage.removeItem(KN); } catch (e) {}
-    KEY = null; $('main').hidden = true; $('logout').hidden = true; $('backupBtn').hidden = true; $('login').hidden = false; $('loginErr').textContent = msg || '';
+    KEY = null; $('main').hidden = true; $('logout').hidden = true; $('backupBtn').hidden = true; $('testBtn').hidden = true; $('login').hidden = false; $('loginErr').textContent = msg || '';
   }
   async function copy(text, label) {
     try { await navigator.clipboard.writeText(text); toast((label || 'Αντιγράφηκε')); } catch (e) { prompt('Αντιγράψτε:', text); }
@@ -187,7 +188,7 @@
     const r = await api({ action: 'list' });
     if (!r.ok) throw new Error('load');
     data = r.data;
-    $('login').hidden = true; $('main').hidden = false; $('logout').hidden = false; $('backupBtn').hidden = false;
+    $('login').hidden = true; $('main').hidden = false; $('logout').hidden = false; $('backupBtn').hidden = false; $('testBtn').hidden = false;
     render();
   }
 
@@ -308,6 +309,18 @@ ${d.links.admin}
     catch (err) { if (err.message !== 'unauthorized') $('loginErr').textContent = 'Δεν ήταν δυνατή η σύνδεση.'; }
   };
   $('logout').onclick = () => logout();
+  $('testBtn').onclick = async () => {
+    const to = prompt('Σε ποιο email να σταλεί το δοκιμαστικό;', '');
+    if (!to) return;
+    const btn = $('testBtn'); btn.disabled = true;
+    try {
+      const r = await api({ action: 'testEmail', to: to.trim() });
+      const d = r.data || {};
+      const err = d.error ? (typeof d.error === 'string' ? d.error : JSON.stringify(d.error, null, 1)) : '';
+      alert((d.ok ? '✓ Το Resend δέχτηκε το email. Κοιτάξτε το inbox (και τα Ανεπιθύμητα).' : '✗ Το email ΔΕΝ στάλθηκε.\n\nΑπάντηση Resend:\n' + err) +
+        `\n\nΑποστολέας: ${d.from || ''}\nEMAIL_FROM: ${d.emailFromVar || ''}\nRESEND_API_KEY: ${d.keyHint || ''}`);
+    } catch (e) {} finally { btn.disabled = false; }
+  };
   $('backupBtn').onclick = async () => {
     const btn = $('backupBtn'); btn.disabled = true;
     try {

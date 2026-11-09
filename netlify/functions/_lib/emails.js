@@ -96,12 +96,33 @@ ${b.extra && svc.extra ? row(esc(svc.extra.label[lang]), esc(b.extra)) : ''}
 const btn = (href, label, gold) =>
   `<a href="${href}" style="display:inline-block;background:${gold};color:#111;text-decoration:none;font-weight:bold;padding:11px 18px;border-radius:8px;margin:4px 6px 4px 0">${label}</a>`;
 
+// Επιστρέφει { ok, id } ή { ok: false, error } — τα σφάλματα γράφονται και στα logs του Netlify
 async function send(msg) {
-  if (global.__APPT_TEST_DB__) { (global.__APPT_SENT__ = global.__APPT_SENT__ || []).push(msg); return; }
-  if (!process.env.RESEND_API_KEY) { console.warn('[appt] RESEND_API_KEY λείπει, email δεν στάλθηκε:', msg.subject); return; }
-  const { Resend } = require('resend');
-  const r = await new Resend(process.env.RESEND_API_KEY).emails.send(msg);
-  if (r && r.error) console.error('[appt] resend error', r.error);
+  if (global.__APPT_TEST_DB__) { (global.__APPT_SENT__ = global.__APPT_SENT__ || []).push(msg); return { ok: true, id: 'test' }; }
+  const key = String(process.env.RESEND_API_KEY || '').trim();
+  if (!key) { console.warn('[appt] RESEND_API_KEY λείπει, email δεν στάλθηκε:', msg.subject); return { ok: false, error: 'RESEND_API_KEY λείπει από το Netlify' }; }
+  try {
+    const { Resend } = require('resend');
+    const r = await new Resend(key).emails.send(msg);
+    if (r && r.error) { console.error('[appt] resend error', msg.from, '->', msg.to, r.error); return { ok: false, error: r.error }; }
+    return { ok: true, id: r && r.data && r.data.id };
+  } catch (e) {
+    console.error('[appt] resend exception', e);
+    return { ok: false, error: String(e && e.message || e) };
+  }
+}
+
+// Δοκιμαστικό email από το superadmin: δείχνει ακριβώς τι απάντησε το Resend
+async function testEmail(to) {
+  const platform = { name: 'Ραντεβού · AR Akron Services', phone: '', site: siteUrl(), theme: { accent: '#2a3dd1' } };
+  const fromAddr = senderAddress();
+  const r = await send({
+    from: `"Ραντεβού · AR Akron" <${fromAddr}>`, to,
+    subject: 'Δοκιμαστικό email · Ραντεβού',
+    html: shell(platform, `<p style="margin:0;font-size:16px">Αν διαβάζετε αυτό, τα email της πλατφόρμας δουλεύουν.</p><p style="margin:12px 0 0;color:#777;font-size:13px">Αποστολέας: ${esc(fromAddr)}</p>`),
+  });
+  const key = String(process.env.RESEND_API_KEY || '').trim();
+  return { ...r, from: fromAddr, emailFromVar: process.env.EMAIL_FROM || '(δεν έχει οριστεί)', keyHint: key ? key.slice(0, 6) + '…' + key.slice(-4) : '(λείπει)' };
 }
 // Αποστολέας: το όνομα είναι ΠΑΝΤΑ της επιχείρησης, η διεύθυνση είναι κοινή για όλη την πλατφόρμα.
 // Το EMAIL_FROM μπορεί να είναι "Όνομα <x@domain>" ή σκέτο "x@domain" — κρατάμε μόνο τη διεύθυνση.
@@ -192,4 +213,4 @@ async function backupToPlatform(to, day, gz, stats) {
   });
 }
 
-module.exports = { toCustomer, toOwner, leadToPlatform, backupToPlatform, niceDate, calendarLink };
+module.exports = { toCustomer, toOwner, leadToPlatform, backupToPlatform, testEmail, niceDate, calendarLink };

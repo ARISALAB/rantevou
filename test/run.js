@@ -405,6 +405,8 @@ const t = async (label, f) => { await f(); ok++; console.log('✓', label); };
     assert.equal(m.to, 'info@arakronservices.gr'); assert.equal(m.attachments.length, 1);
     const back = JSON.parse(require('zlib').gunzipSync(Buffer.from(m.attachments[0].content, 'base64')));
     assert(back.appt.bookings.arakron.rem1 && !back.appt.rate, 'χωρίς τα όρια ανά IP');
+    const te = await call('appt-super', { key: 'test-super-key-1234567890', action: 'testEmail', to: 'me@example.com' });
+    assert.equal(te.body.ok, true); assert.equal(global.__APPT_SENT__.slice(-1)[0].to, 'me@example.com');
     const sb = await call('appt-super', { key: 'test-super-key-1234567890', action: 'backup' });
     assert.equal(sb.code, 200); assert(sb.body.appt.bookings);
   });

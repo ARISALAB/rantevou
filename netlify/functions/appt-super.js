@@ -4,6 +4,7 @@
 // POST { key, action: "resetKey", id }                 -> νέο κλειδί admin (μόνο για επιχειρήσεις της βάσης)
 // POST { key, action: "setActive", id, active }        -> παύση / ενεργοποίηση (σε παύση: η σελίδα κράτησης δεν ανοίγει)
 // POST { key, action: "setLead", id, status }          -> κατάσταση αιτήματος: new | contacted | won | lost
+// POST { key, action: "testEmail", to }               -> στέλνει δοκιμαστικό email και επιστρέφει την απάντηση του Resend
 // POST { key, action: "backup" }                       -> όλη η βάση των ραντεβού σε JSON (λήψη από το superadmin)
 const { json, preflight, parseBody, siteUrl } = require('./_lib/respond');
 const { getDb } = require('./_lib/firebase');
@@ -108,6 +109,13 @@ exports.handler = async (event) => {
         if (!(await ref.get()).exists()) return json(404, { error: 'not_found' });
         await ref.update({ status: body.status });
         return json(200, { ok: true });
+      }
+
+      case 'testEmail': {
+        const to = str(body.to, 120).toLowerCase();
+        if (!EMAIL_RE.test(to)) return json(400, { error: 'invalid', field: 'email' });
+        const emails = require('./_lib/emails');
+        return json(200, await emails.testEmail(to));
       }
 
       case 'backup': {
